@@ -1,0 +1,12 @@
+import stdlib.*;
+import rocketvale.*;
+
+struct MyRequestHandler {}
+impl IRequestHandler for MyRequestHandler;
+fn handle(self &!MyRequestHandler impl IRequestHandler, request_body str) str {
+  ret "got " + request_body + "!";
+}
+
+fn main() export {
+  runServer(&MyRequestHandler());
+}
