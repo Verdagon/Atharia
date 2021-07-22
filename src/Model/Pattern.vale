@@ -1,7 +1,7 @@
 
 struct Pattern {
   hashCode int;
-  name string;
+  name str;
   shapeIndexToCorners List<List<Vec2>>;
   patternTiles List<PatternTile>;
   xOffset Vec2;

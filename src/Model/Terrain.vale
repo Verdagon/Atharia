@@ -3,51 +3,54 @@ struct Terrain {
   pattern Pattern;
   elevationStepHeight int;
   tiles HashMap<Location, TerrainTile, LocationHasher, LocationEquator>;
-
-  fn TileExists(location Location) bool {
-    return tiles.ContainsKey(location);
-  }
-
-  fn GetAdjacentExistingLocations(
-      self &Terrain,
-      loc Location,
-      adjacentCornersToo bool)
-  List<Location> {
-    result = new List<Location>();
-    pattern.GetAdjacentLocations(loc, adjacentCornersToo).each((adjacentLoc){
-      if (self.TileExists(adjacentLoc))
-        result.add(adjacentLoc);
-    });
-    return result;
-  }
-
-  fn GetAdjacentExistingLocations(
-      self &Terrain,
-      sourceLocs HashSet<Location>,
-      includeSourceLocs bool,
-      adjacentCornersToo bool)
-  HashSet<Location> {
-    result = HashSet<Location>();
-    self.pattern.GetAdjacentLocations(sourceLocs, includeSourceLocs, adjacentCornersToo).each((adjacentLoc){
-      if (!self.TileExists(adjacentLoc))
-        continue;
-      result.Add(adjacentLoc);
-    }
-    return result;
-  }
-
-  public Vec3 GetTileCenter( Location loc) {
-    var terrainTile = tiles[loc];
-    var positionVec2 = pattern.GetTileCenter(loc);
-    return new Vec3(
-        positionVec2.x,
-        positionVec2.y,
-        terrainTile.elevation * elevationStepHeight);
-  }
-
-  public int GetElevationDifference(Location locA, Location locB) {
-    return Math.Abs(
-        tiles[locA].elevation -
-        tiles[locB].elevation);
-  }
 }
+
+
+// fn TileExists(location Location) bool {
+//   ret tiles.ContainsKey(location);
+// }
+
+// fn GetAdjacentExistingLocations(
+//     self &Terrain,
+//     loc Location,
+//     adjacentCornersToo bool)
+// List<Location> {
+//   result = List<Location>();
+//   pattern.GetAdjacentLocations(loc, adjacentCornersToo).each((adjacentLoc){
+//     if (self.TileExists(adjacentLoc)) {
+//       result.add(adjacentLoc);
+//     }
+//   });
+//   ret result;
+// }
+
+// fn GetAdjacentExistingLocations(
+//     self &Terrain,
+//     sourceLocs HashSet<Location>,
+//     includeSourceLocs bool,
+//     adjacentCornersToo bool)
+// HashSet<Location> {
+//   result = HashSet<Location>();
+//   self.pattern.GetAdjacentLocations(sourceLocs, includeSourceLocs, adjacentCornersToo).each((adjacentLoc){
+//     if (!self.TileExists(adjacentLoc)) {
+//       continue;
+//     }
+//     result.Add(adjacentLoc);
+//   });
+//   ret result;
+// }
+
+// fn GetTileCenter(loc Location) Vec3 {
+//   var terrainTile = tiles[loc];
+//   var positionVec2 = pattern.GetTileCenter(loc);
+//   ret Vec3(
+//       positionVec2.x,
+//       positionVec2.y,
+//       terrainTile.elevation * elevationStepHeight);
+// }
+
+// fn GetElevationDifference(Location locA, Location locB) int {
+//   ret Math.Abs(
+//       tiles[locA].elevation -
+//       tiles[locB].elevation);
+// }

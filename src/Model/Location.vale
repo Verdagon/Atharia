@@ -1,9 +1,24 @@
 
 struct Location imm {
-  groupX int;
-  groupY int;
-  indexInGroup int;
+  group_x int;
+  group_y int;
+  index_in_group int;
 }
+
+struct LocationHasher { }
+fn __call(this &LocationHasher, loc Location) int {
+  hash = 0;
+  set hash = 33 * hash + loc.group_x;
+  set hash = 37 * hash + loc.group_y;
+  set hash = 41 * hash + loc.index_in_group;
+  ret hash;
+}
+
+struct LocationEquator { }
+fn __call(this &LocationEquator, a Location, b Location) bool {
+  (a.group_x == b.group_x) and (a.group_y == b.group_y) and (a.index_in_group == b.index_in_group)
+}
+
 
 // using System;
 // using System.Collections;

@@ -1,13 +1,13 @@
 
-struct InitialTile imm {
+struct InitialTile {
   // elevationStepHeight float;
   // tileRotationDegrees float;
   // depth int; // basically elevation
   location Location;
   elevation int;
-  topColor IVec4iAnimation;
-  sideColor IVec4iAnimation;
-  maybeOverlaySymbol InitialSymbol;
-  maybeFeatureSymbol InitialSymbol;
-  itemIdToSymbol List<(ulong, InitialSymbol)>;
+  //topColor IVec4iAnimation;
+  //sideColor IVec4iAnimation;
+  //maybeOverlaySymbol InitialSymbol;
+  //maybeFeatureSymbol InitialSymbol;
+  //itemIdToSymbol List<[ulong, InitialSymbol]>;
 }

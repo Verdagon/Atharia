@@ -1,33 +1,28 @@
-// public enum OutlineMode {
-//   NoOutline = 0,
-//   OuterOutline = 1,
-//   CenteredOutline = 2
+
+// fn NoOutline() int { 0 }
+// fn OuterOutline() int { 1 }
+// fn CenteredOutline() int { 2 }
+
+
+// struct InitialSymbolGlyph imm {
+//   symbolId SymbolId;
+//   color IVec4iAnimation;
 // }
 
-fn NoOutline() int { 0 }
-fn OuterOutline() int { 1 }
-fn CenteredOutline() int { 2 }
+// struct InitialSymbolOutline imm {
+//   mode OutlineMode;
+//   color IVec4iAnimation;
+// }
 
+// struct InitialSymbolSides imm {
+//   depthPercent int;
+//   color IVec4iAnimation;
+// }
 
-struct InitialSymbolGlyph imm {
-  symbolId SymbolId;
-  color IVec4iAnimation;
-}
-
-struct InitialSymbolOutline imm {
-  mode OutlineMode;
-  color IVec4iAnimation;
-}
-
-struct InitialSymbolSides imm {
-  depthPercent int;
-  color IVec4iAnimation;
-}
-
-struct InitialSymbol imm {
-  glyph InitialSymbolGlyph;
-  outline InitialSymbolOutline;
-  sides InitialSymbolSides;
-  rotationDegrees int;
-  sizePercent int;
-}
+// struct InitialSymbol imm {
+//   glyph InitialSymbolGlyph;
+//   outline InitialSymbolOutline;
+//   sides InitialSymbolSides;
+//   rotationDegrees int;
+//   sizePercent int;
+// }

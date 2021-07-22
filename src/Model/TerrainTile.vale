@@ -2,5 +2,5 @@
 struct TerrainTile {
   location Location;
   elevation! int;
-  members List<string>;
+  members List<str>;
 }

@@ -1,215 +1,214 @@
 
-struct FadeIn imm {
-  fadeInStartTimeMs long;
-  fadeInEndTimeMs long;
+//struct FadeIn imm {
+//  fadeInStartTimeMs i64;
+//  fadeInEndTimeMs i64;
 
-  fn FadeIn(long fadeInStartTimeMs, long fadeInEndTimeMs) FadeIn {
-    this.fadeInStartTimeMs = fadeInStartTimeMs;
-    this.fadeInEndTimeMs = fadeInEndTimeMs;
+//}
+//fn FadeIn(i64 fadeInStartTimeMs, i64 fadeInEndTimeMs) FadeIn {
+//  this.fadeInStartTimeMs = fadeInStartTimeMs;
+//  this.fadeInEndTimeMs = fadeInEndTimeMs;
 
-    vassert(fadeInStartTimeMs >= 0);
-    vassert(fadeInEndTimeMs >= 0);
-  }
+//  vassert(fadeInStartTimeMs >= 0);
+//  vassert(fadeInEndTimeMs >= 0);
+//}
+//struct FadeOut imm {
+//  fadeOutStartTimeMs i64;
+//  fadeOutEndTimeMs i64;
+//}
+//public FadeOut(
+//    i64 fadeOutStartTimeMs,
+//    i64 fadeOutEndTimeMs) {
+//  this.fadeOutStartTimeMs = fadeOutStartTimeMs;
+//  this.fadeOutEndTimeMs = fadeOutEndTimeMs;
+
+//  // These times are relative to when the overlay is destroyed.
+//  vassert(fadeOutStartTimeMs <= 0);
+//  vassert(fadeOutEndTimeMs <= 0);
+//}
+
+interface IDominoMessage {
 }
-struct FadeOut imm {
-  fadeOutStartTimeMs long;
-  fadeOutEndTimeMs long;
 
-  public FadeOut(
-      long fadeOutStartTimeMs,
-      long fadeOutEndTimeMs) {
-    this.fadeOutStartTimeMs = fadeOutStartTimeMs;
-    this.fadeOutEndTimeMs = fadeOutEndTimeMs;
-
-    // These times are relative to when the overlay is destroyed.
-    vassert(fadeOutStartTimeMs <= 0);
-    vassert(fadeOutEndTimeMs <= 0);
-  }
-}
-
-public interface IDominoMessage imm {
-}
-
-impl IDominoMessage for SetupGameMessage;
-struct SetupGameMessage imm {
-  cameraPosition Vec3;
-  lookatOffsetToCamera Vec3;
-  elevationStepHeight int;
-  pattern Pattern;
-}
+//impl IDominoMessage for SetupGameMessage;
+//struct SetupGameMessage imm {
+//  cameraPosition Vec3;
+//  lookatOffsetToCamera Vec3;
+//  elevationStepHeight int;
+//  pattern Pattern;
+//}
 
 impl IDominoMessage for CreateTileMessage;
-struct CreateTileMessage imm {
-  newTileId ulong;
+struct CreateTileMessage {
+  newTileId int; //u64;
   initialTile InitialTile;
 }
 
-impl IDominoMessage for CreateUnitMessage;
-struct CreateUnitMessage imm {
-  id ulong;
-  initialUnit InitialUnit;
-}
+//impl IDominoMessage for CreateUnitMessage;
+//struct CreateUnitMessage imm {
+//  id u64;
+//  initialUnit InitialUnit;
+//}
 
-impl IDominoMessage for MakePanelMessage;
-struct MakePanelMessage imm {
-  id ulong;
-  panelGXInScreen int;
-  panelGYInScreen int;
-  panelGW int;
-  panelGH int;
-}
+//impl IDominoMessage for MakePanelMessage;
+//struct MakePanelMessage imm {
+//  id u64;
+//  panelGXInScreen int;
+//  panelGYInScreen int;
+//  panelGW int;
+//  panelGH int;
+//}
 
-impl IDominoMessage for ScheduleCloseMessage;
-struct ScheduleCloseMessage imm {
-  viewId ulong;
-  startMsFromNow long;
-}
+//impl IDominoMessage for ScheduleCloseMessage;
+//struct ScheduleCloseMessage imm {
+//  viewId u64;
+//  startMsFromNow i64;
+//}
 
-impl IDominoMessage for RemoveViewMessage;
-struct RemoveViewMessage imm {
-  panelId ulong;
-  viewId ulong;
-}
+//impl IDominoMessage for RemoveViewMessage;
+//struct RemoveViewMessage imm {
+//  panelId u64;
+//  viewId u64;
+//}
 
-impl IDominoMessage for SetOpacityMessage;
-struct SetOpacityMessage imm {
-  viewId ulong;
-  id int;
-  ratio int;
-}
+//impl IDominoMessage for SetOpacityMessage;
+//struct SetOpacityMessage imm {
+//  viewId u64;
+//  id int;
+//  ratio int;
+//}
 
-impl IDominoMessage for SetFadeOutMessage;
-struct SetFadeOutMessage imm {
-  id ulong;
-  fadeOut FadeOut;
-}
+//impl IDominoMessage for SetFadeOutMessage;
+//struct SetFadeOutMessage imm {
+//  id u64;
+//  fadeOut FadeOut;
+//}
 
-impl IDominoMessage for SetFadeInMessage;
-struct SetFadeInMessage imm {
-  id ulong;
-  fadeIn FadeIn;
-}
+//impl IDominoMessage for SetFadeInMessage;
+//struct SetFadeInMessage imm {
+//  id u64;
+//  fadeIn FadeIn;
+//}
 
-impl IDominoMessage for AddButtonMessage;
-struct AddButtonMessage imm {
-  newViewId ulong;
-  parentViewId ulong;
-  x int;
-  y int;
-  width int;
-  height int;
-  z int;
-  color Vec4i;
-  borderColor Vec4i;
-  pressedColor Vec4i;
-  onClicked ulong;
-  onMouseIn ulong;
-  onMouseOut ulong;
-}
+//impl IDominoMessage for AddButtonMessage;
+//struct AddButtonMessage imm {
+//  newViewId u64;
+//  parentViewId u64;
+//  x int;
+//  y int;
+//  width int;
+//  height int;
+//  z int;
+//  color Vec4i;
+//  borderColor Vec4i;
+//  pressedColor Vec4i;
+//  onClicked u64;
+//  onMouseIn u64;
+//  onMouseOut u64;
+//}
 
-impl IDominoMessage for AddRectangleMessage;
-struct AddRectangleMessage imm {
-  newViewId ulong;
-  parentViewId ulong;
-  x int;
-  y int;
-  width int;
-  height int;
-  z int;
-  color Vec4i;
-  borderColor Vec4i;
-}
+//impl IDominoMessage for AddRectangleMessage;
+//struct AddRectangleMessage imm {
+//  newViewId u64;
+//  parentViewId u64;
+//  x int;
+//  y int;
+//  width int;
+//  height int;
+//  z int;
+//  color Vec4i;
+//  borderColor Vec4i;
+//}
 
-impl IDominoMessage for AddSymbolMessage;
-struct AddSymbolMessage imm {
-  newViewId ulong;
-  parentViewId ulong;
-  x int;
-  y int;
-  size int;
-  z int;
-  color Vec4i;
-  symbolId SymbolId;
-  centered bool;
-}
+//impl IDominoMessage for AddSymbolMessage;
+//struct AddSymbolMessage imm {
+//  newViewId u64;
+//  parentViewId u64;
+//  x int;
+//  y int;
+//  size int;
+//  z int;
+//  color Vec4i;
+//  symbolId SymbolId;
+//  centered bool;
+//}
 
-impl IDominoMessage for ShowPrismMessage;
-struct ShowPrismMessage imm {
-  tileViewId ulong;
-  prismDescription InitialSymbol;
-  prismOverlayDescription InitialSymbol;
-}
-impl IDominoMessage for FadeInThenOutMessage;
-struct FadeInThenOutMessage imm {
-  tileViewId ulong;
-  inDurationMs long;
-  outDurationMs long;
-}
-impl IDominoMessage for ShowRuneMessage;
-struct ShowRuneMessage imm {
-  tileId ulong;
-  symbol InitialSymbol;
-}
-impl IDominoMessage for SetOverlayMessage;
-struct SetOverlayMessage imm {
-  tileId ulong;
-  symbol InitialSymbol;
-}
-impl IDominoMessage for SetFeatureMessage;
-struct SetFeatureMessage imm {
-  tileId ulong;
-  symbol InitialSymbol;
-}
-impl IDominoMessage for SetCliffColorMessage;
-struct SetCliffColorMessage imm {
-  tileViewId ulong;
-  sideColor IVec4iAnimation;
-}
-impl IDominoMessage for SetSurfaceColorMessage;
-struct SetSurfaceColorMessage imm {
-  tileViewId ulong;
-  frontColor IVec4iAnimation;
-}
-impl IDominoMessage for SetElevationMessage;
-struct SetElevationMessage imm {
-  tileViewId ulong;
-  elevation int;
-}
-impl IDominoMessage for RemoveItemMessage;
-struct RemoveItemMessage imm {
-  tileViewId ulong;
-  itemId ulong;
-}
-impl IDominoMessage for ClearItemsMessage;
-struct ClearItemsMessage imm {
-  tileViewId ulong;
-}
+//impl IDominoMessage for ShowPrismMessage;
+//struct ShowPrismMessage imm {
+//  tileViewId u64;
+//  prismDescription InitialSymbol;
+//  prismOverlayDescription InitialSymbol;
+//}
+//impl IDominoMessage for FadeInThenOutMessage;
+//struct FadeInThenOutMessage imm {
+//  tileViewId u64;
+//  inDurationMs i64;
+//  outDurationMs i64;
+//}
+//impl IDominoMessage for ShowRuneMessage;
+//struct ShowRuneMessage imm {
+//  tileId u64;
+//  symbol InitialSymbol;
+//}
+//impl IDominoMessage for SetOverlayMessage;
+//struct SetOverlayMessage imm {
+//  tileId u64;
+//  symbol InitialSymbol;
+//}
+//impl IDominoMessage for SetFeatureMessage;
+//struct SetFeatureMessage imm {
+//  tileId u64;
+//  symbol InitialSymbol;
+//}
+//impl IDominoMessage for SetCliffColorMessage;
+//struct SetCliffColorMessage imm {
+//  tileViewId u64;
+//  sideColor IVec4iAnimation;
+//}
+//impl IDominoMessage for SetSurfaceColorMessage;
+//struct SetSurfaceColorMessage imm {
+//  tileViewId u64;
+//  frontColor IVec4iAnimation;
+//}
+//impl IDominoMessage for SetElevationMessage;
+//struct SetElevationMessage imm {
+//  tileViewId u64;
+//  elevation int;
+//}
+//impl IDominoMessage for RemoveItemMessage;
+//struct RemoveItemMessage imm {
+//  tileViewId u64;
+//  itemId u64;
+//}
+//impl IDominoMessage for ClearItemsMessage;
+//struct ClearItemsMessage imm {
+//  tileViewId u64;
+//}
 
-impl IDominoMessage for AddItemMessage;
-struct AddItemMessage imm {
-  tileViewId ulong;
-  itemId ulong;
-  symbolDescription InitialSymbol;
-}
+//impl IDominoMessage for AddItemMessage;
+//struct AddItemMessage imm {
+//  tileViewId u64;
+//  itemId u64;
+//  symbolDescription InitialSymbol;
+//}
 
-impl IDominoMessage for AddDetailMessage;
-struct AddDetailMessage imm {
-  unitViewId ulong;
-  detailId ulong;
-  symbolDescription InitialSymbol;
-}
+//impl IDominoMessage for AddDetailMessage;
+//struct AddDetailMessage imm {
+//  unitViewId u64;
+//  detailId u64;
+//  symbolDescription InitialSymbol;
+//}
 
-impl IDominoMessage for RemoveDetailMessage;
-struct RemoveDetailMessage imm {
-  unitViewId ulong;
-  detailId ulong;
-}
+//impl IDominoMessage for RemoveDetailMessage;
+//struct RemoveDetailMessage imm {
+//  unitViewId u64;
+//  detailId u64;
+//}
 
-impl IDominoMessage for DestroyTileMessage;
-struct DestroyTileMessage imm {
-  tileViewId ulong;
-}
-impl IDominoMessage for DestroyUnitMessage;
-struct DestroyUnitMessage imm {
-  unitId ulong;
-}
+//impl IDominoMessage for DestroyTileMessage;
+//struct DestroyTileMessage imm {
+//  tileViewId u64;
+//}
+//impl IDominoMessage for DestroyUnitMessage;
+//struct DestroyUnitMessage imm {
+//  unitId u64;
+//}
