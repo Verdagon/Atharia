@@ -1,0 +1,118 @@
+import stdlib.*;
+import rocketvale.*;
+import valejson.*;
+import stdlib.stringutils.*;
+
+
+struct Response {
+  builder StringBuilder;
+}
+
+fn jsonToNode(s StrSlice) Result<JsonNode, str> {
+  iter = ParseIter(s, false);
+  node_result = parseJson(&!iter);
+  if (node_result.is_err()) {
+    ret node_result;
+  }
+  if (iter.rest != "".slice()) {
+    ret Err<JsonNode, str>("Still text at end of input: " + iter.rest);
+  }
+  ret node_result;
+}
+
+struct StartRequest {
+  screen_gw int;
+  screen_gh int;
+}
+
+fn handleStartRequest(response &!Response, start_request &StartRequest) Result<[], str> {
+  response.builder!.print(
+    "Starting game! screen_gw {start_request.screen_gw} screen_gh {start_request.screen_gh}");
+  ret Ok<[], str>([]);
+}
+
+fn expect_obj_member_str(obj &JsonObject, field_name StrSlice) Result<str, str> {
+  maybe_request_type_node = obj.fields.get(field_name);
+  if (maybe_request_type_node.isEmpty()) {
+    ret Err<str, str>("Missing '{field_name}' field!");
+  }
+  request_type_node = maybe_request_type_node.get();
+  maybe_request_type_str = request_type_node.as<JsonString>();
+  if (maybe_request_type_str.is_err()) {
+    ret Err<str, str>("Expected '{field_name}' field to be a string!");
+  }
+  ret Ok<str, str>(maybe_request_type_str.expect().value);
+}
+
+fn expect_obj_member_int(obj &JsonObject, field_name StrSlice) Result<int, str> {
+  maybe_request_type_node = obj.fields.get(field_name);
+  if (maybe_request_type_node.isEmpty()) {
+    ret Err<int, str>("Missing '{field_name}' field!");
+  }
+  request_type_node = maybe_request_type_node.get();
+  maybe_request_type_str = request_type_node.as<JsonNumber>();
+  if (maybe_request_type_str.is_err()) {
+    ret Err<int, str>("Expected '{field_name}' field to be a number!");
+  }
+  ret Ok<int, str>(maybe_request_type_str.expect().value);
+}
+
+fn handleRequest(response &!Response, node &JsonObject) Result<[], str> {
+  maybe_request_type_str = expect_obj_member_str(node, "request".slice());
+  if (maybe_request_type_str.is_err()) {
+    ret Err<[], str>(maybe_request_type_str.expect_err());
+  }
+  request_type_str = maybe_request_type_str.expect();
+
+  if (request_type_str == "start") {
+    maybe_screen_gw = expect_obj_member_int(node, "screenGW".slice());
+    if (maybe_screen_gw.is_err()) {
+      ret Err<[], str>(maybe_screen_gw.expect_err());
+    }
+    screen_gw = maybe_screen_gw.expect();
+
+    maybe_screen_gh = expect_obj_member_int(node, "screenGW".slice());
+    if (maybe_screen_gh.is_err()) {
+      ret Err<[], str>(maybe_screen_gh.expect_err());
+    }
+    screen_gh = maybe_screen_gh.expect();
+
+    request = StartRequest(screen_gw, screen_gh);
+    ret handleStartRequest(response, &request);
+  } else {
+    ret Err<[], str>("Unknown request type: " + request_type_str);
+  }
+}
+
+struct MyRequestHandler {
+  counter! int;
+}
+impl IRequestHandler for MyRequestHandler;
+fn handle(self &!MyRequestHandler impl IRequestHandler, request_path str, request_json str) str {
+  maybe_request_root_node = jsonToNode(request_json.slice());
+  if (maybe_request_root_node.is_err()) {
+    ret "Couldn't parse request: " + maybe_request_root_node.expect_err();
+  }
+  request_root_node = (maybe_request_root_node).expect();
+
+  maybe_request_root_obj = request_root_node.as<JsonObject>();
+  if (maybe_request_root_obj.is_err()) {
+    ret "Request wasn't json object!";
+  }
+  request_root_obj = maybe_request_root_obj.expect();
+
+  response = Response(StringBuilder(List<StrSlice>()));
+  result = handleRequest(&!response, &request_root_obj);
+
+  set self.counter = self.counter + 1;
+
+  if (result.is_ok()) {
+    ret "Response: " + response.builder.assembleStr();
+  } else {
+    ret "Error: " + result.expect_err();
+  }
+}
+
+fn main() export {
+  runServer(&MyRequestHandler(0));
+}

@@ -1,0 +1,1 @@
+python3 ~/Vale/release-unix/valec.py build atharia atharia:src rocketvale:~/RocketVale/src rocketvale:~/RocketVale/src/native/rust/target/debug/librocketvale.a valejson:~/ValeJSON/src stdlib:~/stdlib/src parseiter:~/ParseIter/src --output-dir build --add-exports-include-path --region-override resilient-v3
