@@ -1,0 +1,15 @@
+
+struct ConstantVec4iAnimation {
+  vec Vec4i;
+}
+impl IVec4iAnimation for ConstantVec4iAnimation;
+
+fn ConstantVec4iAnimationWithAll(n int) ConstantVec4iAnimation {
+  ConstantVec4iAnimation(Vec4iWithAll(n))
+}
+
+fn ConstantVec4iAnimationWhite() ConstantVec4iAnimation { ConstantVec4iAnimation(Vec4iWhite()) }
+fn ConstantVec4iAnimationCyan() ConstantVec4iAnimation { ConstantVec4iAnimation(Vec4iCyan()) }
+fn ConstantVec4iAnimationRed() ConstantVec4iAnimation { ConstantVec4iAnimation(Vec4iRed()) }
+fn ConstantVec4iAnimationBlack() ConstantVec4iAnimation { ConstantVec4iAnimation(Vec4iBlack()) }
+fn ConstantVec4iAnimationBlue() ConstantVec4iAnimation { ConstantVec4iAnimation(Vec4iBlue()) }

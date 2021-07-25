@@ -1,0 +1,26 @@
+
+fn expect_obj_member_str(obj &JsonObject, field_name str) Result<str, str> {
+  maybe_request_type_node = obj.fields.get(field_name);
+  if (maybe_request_type_node.isEmpty()) {
+    ret Err<str, str>("Missing '{field_name}' field!");
+  }
+  request_type_node = maybe_request_type_node.get();
+  maybe_request_type_str = request_type_node.as<JsonString>();
+  if (maybe_request_type_str.is_err()) {
+    ret Err<str, str>("Expected '{field_name}' field to be a string!");
+  }
+  ret Ok<str, str>(maybe_request_type_str.expect().value);
+}
+
+fn expect_obj_member_int(obj &JsonObject, field_name str) Result<int, str> {
+  maybe_request_type_node = obj.fields.get(field_name);
+  if (maybe_request_type_node.isEmpty()) {
+    ret Err<int, str>("Missing '{field_name}' field!");
+  }
+  request_type_node = maybe_request_type_node.get();
+  maybe_request_type_str = request_type_node.as<JsonNumber>();
+  if (maybe_request_type_str.is_err()) {
+    ret Err<int, str>("Expected '{field_name}' field to be a number!");
+  }
+  ret Ok<int, str>(maybe_request_type_str.expect().value);
+}

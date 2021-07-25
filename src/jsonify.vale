@@ -1,0 +1,43 @@
+
+fn JsonNode(self &Vec4i) JsonNode {
+  node = JsonObject();
+  node.fields!.add("x", self.x.JsonNode());
+  node.fields!.add("y", self.y.JsonNode());
+  node.fields!.add("z", self.z.JsonNode());
+  node.fields!.add("w", self.w.JsonNode());
+  ret node;
+}
+
+fn JsonNode(virtual self &IVec4iAnimation) JsonNode abstract;
+fn JsonNode(self &ConstantVec4iAnimation impl IVec4iAnimation) JsonNode {
+  node = JsonObject();
+  node.fields!.add("IVec4iAnimation", "ConstantVec4iAnimation".JsonNode());
+  node.fields!.add("vec", self.vec.JsonNode());
+  ret node;
+}
+
+fn JsonNode(self &Location) JsonNode {
+  node = JsonObject();
+  node.fields!.add("group_x", self.group_x.JsonNode());
+  node.fields!.add("group_y", self.group_y.JsonNode());
+  node.fields!.add("index_in_group", self.index_in_group.JsonNode());
+  ret node;
+}
+
+fn JsonNode(self &InitialTile) JsonNode {
+  node = JsonObject();
+  node.fields!.add("location", self.location.JsonNode());
+  node.fields!.add("elevation", self.elevation.JsonNode());
+  node.fields!.add("top_color", self.topColor.JsonNode());
+  node.fields!.add("side_color", self.sideColor.JsonNode());
+  ret node;
+}
+
+fn JsonNode(virtual self &IDominoMessage) JsonNode abstract;
+fn JsonNode(self &CreateTileMessage impl IDominoMessage) JsonNode {
+  node = JsonObject();
+  node.fields!.add("command_type", "CreateTile".JsonNode());
+  node.fields!.add("tileId", self.newTileId.JsonNode());
+  node.fields!.add("initial_tile", self.initialTile.JsonNode());
+  ret node;
+}

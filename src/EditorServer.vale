@@ -3,6 +3,8 @@ import rocketvale.*;
 import valejson.*;
 import stdlib.stringutils.*;
 import atharia.model.*;
+import atharia.model.animation.*;
+import atharia.network.*;
 
 
 struct Response {
@@ -26,76 +28,23 @@ struct StartRequest {
   screen_gh int;
 }
 
-fn to_json_node(self &Location) JsonNode {
-  node = JsonObject();
-  node.fields!.add("group_x", JsonNumber(self.group_x));
-  node.fields!.add("group_y", JsonNumber(self.group_y));
-  node.fields!.add("index_in_group", JsonNumber(self.index_in_group));
-  ret node;
-}
+fn handleStartRequest(domino &!GameToDominoConnection, start_request &StartRequest) Result<[], str> {
 
-fn to_json_node(self &InitialTile) JsonNode {
-  node = JsonObject();
-  node.fields!.add("location", self.location.to_json_node());
-  node.fields!.add("elevation", JsonNumber(self.elevation));
-  ret node;
-}
-
-fn to_json_node(self &CreateTileMessage) JsonNode {
-  node = JsonObject();
-  node.fields!.add("command_type", JsonString("CreateTile"));
-  node.fields!.add("tileId", JsonNumber(self.newTileId));
-  node.fields!.add("initial_tile", self.initialTile.to_json_node());
-  ret node;
-}
-
-fn handleStartRequest(response &!Response, start_request &StartRequest) Result<[], str> {
-
-      message =
-        CreateTileMessage(
-          0,
-          InitialTile(
-              Location(start_request.screen_gw, start_request.screen_gh, 5),
-              6)); //,
-              //CalculateTintedFrontColor(membersFrontColors[membersFrontColors.Count - 1].Item2, selected, highlighted),
-              //membersSideColors[membersSideColors.Count - 1].Item2,
-              //CalculateMaybeOverlay(membersOverlays),
-              //CalculateMaybeFeature(membersFeatures),
-              //membersItems);
-      //tileViewId = domino.CreateTile(initialTileDescription);
-
-  response.builder!.print(message.to_json_node().str());
+  initialTileDescription =
+      InitialTile(
+          Location(start_request.screen_gw, start_request.screen_gh, 5),
+          6,
+          ConstantVec4iAnimationRed(), //CalculateTintedFrontColor(membersFrontColors[membersFrontColors.Count - 1].Item2, selected, highlighted),
+          ConstantVec4iAnimationBlue()); //membersSideColors[membersSideColors.Count - 1].Item2,
+          //CalculateMaybeOverlay(membersOverlays),
+          //CalculateMaybeFeature(membersFeatures),
+          //membersItems);
+  tileViewId = domino!.create_tile(initialTileDescription);
 
   ret Ok<[], str>([]);
 }
 
-fn expect_obj_member_str(obj &JsonObject, field_name str) Result<str, str> {
-  maybe_request_type_node = obj.fields.get(field_name);
-  if (maybe_request_type_node.isEmpty()) {
-    ret Err<str, str>("Missing '{field_name}' field!");
-  }
-  request_type_node = maybe_request_type_node.get();
-  maybe_request_type_str = request_type_node.as<JsonString>();
-  if (maybe_request_type_str.is_err()) {
-    ret Err<str, str>("Expected '{field_name}' field to be a string!");
-  }
-  ret Ok<str, str>(maybe_request_type_str.expect().value);
-}
-
-fn expect_obj_member_int(obj &JsonObject, field_name str) Result<int, str> {
-  maybe_request_type_node = obj.fields.get(field_name);
-  if (maybe_request_type_node.isEmpty()) {
-    ret Err<int, str>("Missing '{field_name}' field!");
-  }
-  request_type_node = maybe_request_type_node.get();
-  maybe_request_type_str = request_type_node.as<JsonNumber>();
-  if (maybe_request_type_str.is_err()) {
-    ret Err<int, str>("Expected '{field_name}' field to be a number!");
-  }
-  ret Ok<int, str>(maybe_request_type_str.expect().value);
-}
-
-fn handleRequest(response &!Response, node &JsonObject) Result<[], str> {
+fn handleRequest(domino &!GameToDominoConnection, node &JsonObject) Result<[], str> {
   maybe_request_type_str = expect_obj_member_str(node, "request_type");
   if (maybe_request_type_str.is_err()) {
     ret Err<[], str>(maybe_request_type_str.expect_err());
@@ -116,7 +65,7 @@ fn handleRequest(response &!Response, node &JsonObject) Result<[], str> {
     screen_gh = maybe_screen_gh.expect();
 
     request = StartRequest(screen_gw, screen_gh);
-    ret handleStartRequest(response, &request);
+    ret handleStartRequest(domino, &request);
   } else {
     ret Err<[], str>("Unknown request type: " + request_type_str);
   }
@@ -139,16 +88,21 @@ fn handle(self &!MyRequestHandler impl IRequestHandler, request_path str, reques
   }
   request_root_obj = maybe_request_root_obj.expect();
 
+  domino = GameToDominoConnection();
+  result = handleRequest(&!domino, &request_root_obj);
+  if (result.is_err()) {
+    ret "Error: " + result.expect_err();
+  }
+
   response = Response(StringBuilder(List<StrSlice>()));
-  result = handleRequest(&!response, &request_root_obj);
+  domino.messages.each((message){
+    response.builder!.print(message.JsonNode().str());
+  });
+  drop(domino);
 
   set self.counter = self.counter + 1;
 
-  if (result.is_ok()) {
-    ret "Response: " + response.builder.assembleStr();
-  } else {
-    ret "Error: " + result.expect_err();
-  }
+  ret "Response: " + response.builder.assembleStr();
 }
 
 fn main() export {
