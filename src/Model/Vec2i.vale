@@ -1,5 +1,5 @@
 
-struct Vec2 imm {
+struct Vec2i imm {
   x int;
   y int;
 }

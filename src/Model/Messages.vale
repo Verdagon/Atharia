@@ -1,5 +1,5 @@
 
-//struct FadeIn imm {
+//struct FadeIn {
 //  fadeInStartTimeMs i64;
 //  fadeInEndTimeMs i64;
 
@@ -11,7 +11,7 @@
 //  vassert(fadeInStartTimeMs >= 0);
 //  vassert(fadeInEndTimeMs >= 0);
 //}
-//struct FadeOut imm {
+//struct FadeOut {
 //  fadeOutStartTimeMs i64;
 //  fadeOutEndTimeMs i64;
 //}
@@ -29,13 +29,13 @@
 interface IDominoMessage {
 }
 
-//impl IDominoMessage for SetupGameMessage;
-//struct SetupGameMessage imm {
-//  cameraPosition Vec3;
-//  lookatOffsetToCamera Vec3;
-//  elevationStepHeight int;
-//  pattern Pattern;
-//}
+impl IDominoMessage for SetupGameMessage;
+struct SetupGameMessage {
+  camera_position Vec3i;
+  lookat_offset_to_camera Vec3i;
+  elevation_step_height int;
+  pattern Pattern;
+}
 
 impl IDominoMessage for CreateTileMessage;
 struct CreateTileMessage {
@@ -44,13 +44,13 @@ struct CreateTileMessage {
 }
 
 //impl IDominoMessage for CreateUnitMessage;
-//struct CreateUnitMessage imm {
+//struct CreateUnitMessage {
 //  id u64;
 //  initialUnit InitialUnit;
 //}
 
 //impl IDominoMessage for MakePanelMessage;
-//struct MakePanelMessage imm {
+//struct MakePanelMessage {
 //  id u64;
 //  panelGXInScreen int;
 //  panelGYInScreen int;
@@ -59,38 +59,38 @@ struct CreateTileMessage {
 //}
 
 //impl IDominoMessage for ScheduleCloseMessage;
-//struct ScheduleCloseMessage imm {
+//struct ScheduleCloseMessage {
 //  viewId u64;
 //  startMsFromNow i64;
 //}
 
 //impl IDominoMessage for RemoveViewMessage;
-//struct RemoveViewMessage imm {
+//struct RemoveViewMessage {
 //  panelId u64;
 //  viewId u64;
 //}
 
 //impl IDominoMessage for SetOpacityMessage;
-//struct SetOpacityMessage imm {
+//struct SetOpacityMessage {
 //  viewId u64;
 //  id int;
 //  ratio int;
 //}
 
 //impl IDominoMessage for SetFadeOutMessage;
-//struct SetFadeOutMessage imm {
+//struct SetFadeOutMessage {
 //  id u64;
 //  fadeOut FadeOut;
 //}
 
 //impl IDominoMessage for SetFadeInMessage;
-//struct SetFadeInMessage imm {
+//struct SetFadeInMessage {
 //  id u64;
 //  fadeIn FadeIn;
 //}
 
 //impl IDominoMessage for AddButtonMessage;
-//struct AddButtonMessage imm {
+//struct AddButtonMessage {
 //  newViewId u64;
 //  parentViewId u64;
 //  x int;
@@ -107,7 +107,7 @@ struct CreateTileMessage {
 //}
 
 //impl IDominoMessage for AddRectangleMessage;
-//struct AddRectangleMessage imm {
+//struct AddRectangleMessage {
 //  newViewId u64;
 //  parentViewId u64;
 //  x int;
@@ -120,7 +120,7 @@ struct CreateTileMessage {
 //}
 
 //impl IDominoMessage for AddSymbolMessage;
-//struct AddSymbolMessage imm {
+//struct AddSymbolMessage {
 //  newViewId u64;
 //  parentViewId u64;
 //  x int;
@@ -133,82 +133,82 @@ struct CreateTileMessage {
 //}
 
 //impl IDominoMessage for ShowPrismMessage;
-//struct ShowPrismMessage imm {
+//struct ShowPrismMessage {
 //  tileViewId u64;
 //  prismDescription InitialSymbol;
 //  prismOverlayDescription InitialSymbol;
 //}
 //impl IDominoMessage for FadeInThenOutMessage;
-//struct FadeInThenOutMessage imm {
+//struct FadeInThenOutMessage {
 //  tileViewId u64;
 //  inDurationMs i64;
 //  outDurationMs i64;
 //}
 //impl IDominoMessage for ShowRuneMessage;
-//struct ShowRuneMessage imm {
+//struct ShowRuneMessage {
 //  tileId u64;
 //  symbol InitialSymbol;
 //}
 //impl IDominoMessage for SetOverlayMessage;
-//struct SetOverlayMessage imm {
+//struct SetOverlayMessage {
 //  tileId u64;
 //  symbol InitialSymbol;
 //}
 //impl IDominoMessage for SetFeatureMessage;
-//struct SetFeatureMessage imm {
+//struct SetFeatureMessage {
 //  tileId u64;
 //  symbol InitialSymbol;
 //}
 //impl IDominoMessage for SetCliffColorMessage;
-//struct SetCliffColorMessage imm {
+//struct SetCliffColorMessage {
 //  tileViewId u64;
 //  sideColor IVec4iAnimation;
 //}
 //impl IDominoMessage for SetSurfaceColorMessage;
-//struct SetSurfaceColorMessage imm {
+//struct SetSurfaceColorMessage {
 //  tileViewId u64;
 //  frontColor IVec4iAnimation;
 //}
 //impl IDominoMessage for SetElevationMessage;
-//struct SetElevationMessage imm {
+//struct SetElevationMessage {
 //  tileViewId u64;
 //  elevation int;
 //}
 //impl IDominoMessage for RemoveItemMessage;
-//struct RemoveItemMessage imm {
+//struct RemoveItemMessage {
 //  tileViewId u64;
 //  itemId u64;
 //}
 //impl IDominoMessage for ClearItemsMessage;
-//struct ClearItemsMessage imm {
+//struct ClearItemsMessage {
 //  tileViewId u64;
 //}
 
 //impl IDominoMessage for AddItemMessage;
-//struct AddItemMessage imm {
+//struct AddItemMessage {
 //  tileViewId u64;
 //  itemId u64;
 //  symbolDescription InitialSymbol;
 //}
 
 //impl IDominoMessage for AddDetailMessage;
-//struct AddDetailMessage imm {
+//struct AddDetailMessage {
 //  unitViewId u64;
 //  detailId u64;
 //  symbolDescription InitialSymbol;
 //}
 
 //impl IDominoMessage for RemoveDetailMessage;
-//struct RemoveDetailMessage imm {
+//struct RemoveDetailMessage {
 //  unitViewId u64;
 //  detailId u64;
 //}
 
 //impl IDominoMessage for DestroyTileMessage;
-//struct DestroyTileMessage imm {
+//struct DestroyTileMessage {
 //  tileViewId u64;
 //}
 //impl IDominoMessage for DestroyUnitMessage;
-//struct DestroyUnitMessage imm {
+//struct DestroyUnitMessage {
 //  unitId u64;
 //}

@@ -1,10 +1,9 @@
 
 struct PatternSideAdjacency {
-  hashCode int;
-  groupRelativeX int;
-  groupRelativeY int;
-  tileIndex int;
-  sideIndex int;
+  group_relative_x int;
+  group_relative_y int;
+  tile_index int;
+  side_index int;
 }
 
 // using System;

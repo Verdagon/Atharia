@@ -1,5 +1,5 @@
 
-struct Vec3 imm {
+struct Vec3i imm {
   x int;
   y int;
   z int;

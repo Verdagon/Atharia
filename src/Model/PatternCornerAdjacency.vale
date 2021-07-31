@@ -1,11 +1,10 @@
 
 
 struct PatternCornerAdjacency {
-  hashCode int;
-  groupRelativeX int;
-  groupRelativeY int;
-  tileIndex int;
-  cornerIndex int;
+  group_relative_x int;
+  group_relative_y int;
+  tile_index int;
+  corner_index int;
 }
 
 

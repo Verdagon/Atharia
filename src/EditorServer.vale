@@ -30,6 +30,15 @@ struct StartRequest {
 
 fn handleStartRequest(domino &!GameToDominoConnection, start_request &StartRequest) Result<[], str> {
 
+  cameraLookAtPosition = Vec3i(0, 0, 0); //terrain.GetTileCenter(startLocation);
+  lookatOffsetToCamera = Vec3i(0, 5000, -10000);
+
+  domino!.setup_game(
+      cameraLookAtPosition,
+      lookatOffsetToCamera,
+      200,
+      make_pentagon_9_pattern());
+
   initialTileDescription =
       InitialTile(
           Location(start_request.screen_gw, start_request.screen_gh, 5),

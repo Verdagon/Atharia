@@ -1,12 +1,11 @@
 
 
 struct PatternTile {
-  hashCode int;
-  shapeIndex int;
-  rotateRadianards int; // radianard means radians times 1000
-  translate Vec2;
-  sideIndexToSideAdjacencies List<PatternSideAdjacency>;
-  cornerIndexToCornerAdjacencies List<List<PatternCornerAdjacency>>;
+  shape_index int;
+  rotate_radianards int; // radianard means radians times 1000
+  translate Vec2i;
+  side_index_to_side_adjacencies List<PatternSideAdjacency>;
+  corner_index_to_corner_adjacencies List<List<PatternCornerAdjacency>>;
 }
 
 // using System;

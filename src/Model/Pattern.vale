@@ -1,11 +1,10 @@
 
 struct Pattern {
-  hashCode int;
   name str;
-  shapeIndexToCorners List<List<Vec2>>;
-  patternTiles List<PatternTile>;
-  xOffset Vec2;
-  yOffset Vec2;
+  shape_index_to_corners List<List<Vec2i>>;
+  pattern_tiles List<PatternTile>;
+  x_offset Vec2i;
+  y_offset Vec2i;
 }
 
 

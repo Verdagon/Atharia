@@ -74,9 +74,18 @@ fn create_tile(self &!GameToDominoConnection, initialTile InitialTile) int {
 //   ret id;
 // }
 
-//     public void SetupGame(Vec3 cameraPosition, Vec3 lookatOffsetToCamera, int elevationStepHeight, Pattern pattern) {
-//       messages.Add(new SetupGameMessage(cameraPosition, lookatOffsetToCamera, elevationStepHeight, pattern));
-//     }
+fn setup_game(
+  self &!GameToDominoConnection,
+  cameraPosition Vec3i,
+  lookatOffsetToCamera Vec3i,
+  elevationStepHeight int,
+  pattern Pattern)
+{
+  //id = self.next_id;
+  //set self.next_id = self.next_id + 1;
+  self.messages!.add(SetupGameMessage(cameraPosition, lookatOffsetToCamera, elevationStepHeight, pattern));
+  //ret id;
+}
 
 //     public void ScheduleClose(ulong viewId, long startMsFromNow) {
 //       messages.Add(new ScheduleCloseMessage(viewId, startMsFromNow));
