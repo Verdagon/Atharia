@@ -14,14 +14,14 @@ fn trigger(self &!Event) {
 }
 
 struct GameToDominoConnection {
-  messages List<IDominoMessage>;
+  commands List<IDominoCommand>;
   next_id! int;
   events HashMap<int, Event, IntHasher, IntEquator>;
 }
 
 fn GameToDominoConnection() GameToDominoConnection {
   GameToDominoConnection(
-    List<IDominoMessage>(),
+    List<IDominoCommand>(),
     1,
     HashMap<int, Event, IntHasher, IntEquator>(
       IntHasher(), IntEquator()))
@@ -33,7 +33,7 @@ fn GameToDominoConnection() GameToDominoConnection {
 //         int panelGW,
 //         int panelGH) {
 //       ulong id = nextId++;
-//       messages.Add(new MakePanelMessage(id, panelGXInScreen, panelGYInScreen, panelGW, panelGH));
+//       commands.Add(new MakePanelCommand(id, panelGXInScreen, panelGYInScreen, panelGW, panelGH));
 //       return id;
 //       // return new Panel(this, id, panelGW, panelGH);
 //     }
@@ -63,14 +63,14 @@ fn GameToDominoConnection() GameToDominoConnection {
 fn create_tile(self &!GameToDominoConnection, initialTile InitialTile) int {
   id = self.next_id;
   set self.next_id = self.next_id + 1;
-  self.messages!.add(CreateTileMessage(id, initialTile));
+  self.commands!.add(CreateTileCommand(id, initialTile));
   ret id;
 }
 
 // fn create_unit(initialUnit InitialUnit) {
 //   id = nextId;
 //   set nextId = nextId + 1;
-//   domino.messages!.add(CreateUnitMessage(id, initialUnit));
+//   domino.commands!.add(CreateUnitCommand(id, initialUnit));
 //   ret id;
 // }
 
@@ -83,28 +83,28 @@ fn setup_game(
 {
   //id = self.next_id;
   //set self.next_id = self.next_id + 1;
-  self.messages!.add(SetupGameMessage(cameraPosition, lookatOffsetToCamera, elevationStepHeight, pattern));
+  self.commands!.add(SetupGameCommand(cameraPosition, lookatOffsetToCamera, elevationStepHeight, pattern));
   //ret id;
 }
 
 //     public void ScheduleClose(ulong viewId, long startMsFromNow) {
-//       messages.Add(new ScheduleCloseMessage(viewId, startMsFromNow));
+//       commands.Add(new ScheduleCloseCommand(viewId, startMsFromNow));
 //     }
 
 //     public void RemoveView(ulong viewId) {
-//       messages.Add(new RemoveViewMessage(viewId));
+//       commands.Add(new RemoveViewCommand(viewId));
 //     }
 
 //     public void SetOpacity(ulong viewId, int id, int percent) {
-//       messages.Add(new SetOpacityMessage(viewId, id, percent));
+//       commands.Add(new SetOpacityCommand(viewId, id, percent));
 //     }
 
 //     public void SetFadeOut(ulong id, FadeOut fadeOut) {
-//       messages.Add(new SetFadeOutMessage(id, fadeOut));
+//       commands.Add(new SetFadeOutCommand(id, fadeOut));
 //     }
 
 //     public void SetFadeIn(ulong id, FadeIn fadeIn) {
-//       messages.Add(new SetFadeInMessage(id, fadeIn));
+//       commands.Add(new SetFadeInCommand(id, fadeIn));
 //     }
 
 //     public List<ulong> AddString(
@@ -143,8 +143,8 @@ fn setup_game(
 //       Asserts.Assert(onMouseOut != null);
       
 //       ulong newViewId = nextId++;
-//       messages.Add(
-//           new AddButtonMessage(
+//       commands.Add(
+//           new AddButtonCommand(
 //               newViewId, parentViewId, x, y, width, height, z, color, borderColor, pressedColor, onClicked.id,
 //               onMouseIn.id, onMouseOut.id));
 //       return newViewId;
@@ -152,7 +152,7 @@ fn setup_game(
 
 //     // public ulong AddFullscreenRect(ulong parentViewId, Color color) {
 //     //   ulong newViewId = nextId++;
-//     //   messages.Add(new AddFullscreenRectMessage(newViewId, parentViewId, color));
+//     //   commands.Add(new AddFullscreenRectCommand(newViewId, parentViewId, color));
 //     //   return newViewId;
 //     // }
 
@@ -166,8 +166,8 @@ fn setup_game(
 //         Vec4i color,
 //         Vec4i borderColor) {
 //       ulong newViewId = nextId++;
-//       messages.Add(
-//           new AddRectangleMessage(newViewId, parentViewId, x, y, width, height, z, color, borderColor));
+//       commands.Add(
+//           new AddRectangleCommand(newViewId, parentViewId, x, y, width, height, z, color, borderColor));
 //       return newViewId;
 //     }
 
@@ -181,55 +181,55 @@ fn setup_game(
 //         SymbolId symbol,
 //         bool centered) {
 //       ulong newViewId = nextId++;
-//       messages.Add(new AddSymbolMessage(newViewId, parentViewId, x, y, size, z, color, symbol, centered));
+//       commands.Add(new AddSymbolCommand(newViewId, parentViewId, x, y, size, z, color, symbol, centered));
 //       return newViewId;
 //     }
     
     
 //     public void ShowPrism(ulong tileViewId, InitialSymbol prismDescription, InitialSymbol prismOverlayDescription) {
-//       messages.Add(new ShowPrismMessage(tileViewId, prismDescription, prismOverlayDescription));
+//       commands.Add(new ShowPrismCommand(tileViewId, prismDescription, prismOverlayDescription));
 //     }
 //     public void FadeInThenOut(ulong tileViewId, long inDurationMs, long outDurationMs) {
-//       messages.Add(new FadeInThenOutMessage(tileViewId, inDurationMs, outDurationMs));
+//       commands.Add(new FadeInThenOutCommand(tileViewId, inDurationMs, outDurationMs));
 //     }
 //     public void ShowRune(ulong tileViewId, InitialSymbol runeSymbolDescription) {
-//       messages.Add(new ShowRuneMessage(tileViewId, runeSymbolDescription));
+//       commands.Add(new ShowRuneCommand(tileViewId, runeSymbolDescription));
 //     }
 //     public void SetOverlay(ulong tileViewId, InitialSymbol maybeOverlay) {
-//       messages.Add(new SetOverlayMessage(tileViewId, maybeOverlay));
+//       commands.Add(new SetOverlayCommand(tileViewId, maybeOverlay));
 //     }
 //     public void SetFeature(ulong tileViewId, InitialSymbol maybeFeature) {
-//       messages.Add(new SetFeatureMessage(tileViewId, maybeFeature));
+//       commands.Add(new SetFeatureCommand(tileViewId, maybeFeature));
 //     }
-//     public void SetCliffColor(ulong tileViewId, IVec4iAnimation sideColor) {
-//       messages.Add(new SetCliffColorMessage(tileViewId, sideColor));
+//     public void SetCliffColor(ulong tileViewId, Vec4iAnimation sideColor) {
+//       commands.Add(new SetCliffColorCommand(tileViewId, sideColor));
 //     }
-//     public void SetSurfaceColor(ulong tileViewId, IVec4iAnimation frontColor) {
-//       messages.Add(new SetSurfaceColorMessage(tileViewId, frontColor));
+//     public void SetSurfaceColor(ulong tileViewId, Vec4iAnimation frontColor) {
+//       commands.Add(new SetSurfaceColorCommand(tileViewId, frontColor));
 //     }
 //     public void SetElevation(ulong tileViewId, int elevation) {
-//       messages.Add(new SetElevationMessage(tileViewId, elevation));
+//       commands.Add(new SetElevationCommand(tileViewId, elevation));
 //     }
 //     public void RemoveItem(ulong tileViewId, ulong id) {
-//       messages.Add(new RemoveItemMessage(tileViewId, id));
+//       commands.Add(new RemoveItemCommand(tileViewId, id));
 //     }
 //     public void ClearItems(ulong tileViewId) {
-//       messages.Add(new ClearItemsMessage(tileViewId));
+//       commands.Add(new ClearItemsCommand(tileViewId));
 //     }
 //     public void AddItem(ulong tileViewId, ulong itemId, InitialSymbol symbolDescription) {
-//       messages.Add(new AddItemMessage(tileViewId, itemId, symbolDescription));
+//       commands.Add(new AddItemCommand(tileViewId, itemId, symbolDescription));
 //     }
 //     public void DestroyTile(ulong tileViewId) {
-//       messages.Add(new DestroyTileMessage(tileViewId));
+//       commands.Add(new DestroyTileCommand(tileViewId));
 //     }
 
 //     public void DestroyUnit(ulong unitViewId) {
-//       messages.Add(new DestroyUnitMessage(unitViewId));
+//       commands.Add(new DestroyUnitCommand(unitViewId));
 //     }
 
-//     public List<IDominoMessage> TakeMessages() {
-//       var copy = new List<IDominoMessage>(messages);
-//       messages.Clear();
+//     public List<IDominoCommand> TakeCommands() {
+//       var copy = new List<IDominoCommand>(commands);
+//       commands.Clear();
 //       return copy;
 //     }
 //   }

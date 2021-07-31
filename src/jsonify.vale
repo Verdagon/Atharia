@@ -23,11 +23,11 @@ fn JsonNode(self &Vec4i) JsonNode {
   ret node;
 }
 
-fn JsonNode(virtual self &IVec4iAnimation) JsonNode abstract;
-fn JsonNode(self &ConstantVec4iAnimation impl IVec4iAnimation) JsonNode {
+fn JsonNode(virtual self &Vec4iAnimation) JsonNode abstract;
+fn JsonNode(self &ConstantVec4iAnimation impl Vec4iAnimation) JsonNode {
   node = JsonObject();
-  node.fields!.add("IVec4iAnimation", "ConstantVec4iAnimation".JsonNode());
-  node.fields!.add("vec", self.vec.JsonNode());
+  node.fields!.add("Vec4iAnimation", "ConstantVec4iAnimation".JsonNode());
+  node.fields!.add("val", self.val.JsonNode());
   ret node;
 }
 
@@ -48,19 +48,19 @@ fn JsonNode(self &InitialTile) JsonNode {
   ret node;
 }
 
-fn JsonNode(virtual self &IDominoMessage) JsonNode abstract;
-fn JsonNode(self &CreateTileMessage impl IDominoMessage) JsonNode {
+fn JsonNode(virtual self &IDominoCommand) JsonNode abstract;
+fn JsonNode(self &CreateTileCommand impl IDominoCommand) JsonNode {
   node = JsonObject();
   node.fields!.add("command_type", "CreateTile".JsonNode());
-  node.fields!.add("tileId", self.newTileId.JsonNode());
+  node.fields!.add("tile_id", self.newTileId.JsonNode());
   node.fields!.add("initial_tile", self.initialTile.JsonNode());
   ret node;
 }
-fn JsonNode(self &SetupGameMessage impl IDominoMessage) JsonNode {
+fn JsonNode(self &SetupGameCommand impl IDominoCommand) JsonNode {
   node = JsonObject();
   node.fields!.add("command_type", "SetupGame".JsonNode());
-  node.fields!.add("camera_position", self.camera_position.JsonNode());
-  node.fields!.add("lookat_offset_to_camera", self.lookat_offset_to_camera.JsonNode());
+  node.fields!.add("look_at", self.look_at.JsonNode());
+  node.fields!.add("look_at_offset_to_camera", self.look_at_offset_to_camera.JsonNode());
   node.fields!.add("elevation_step_height", self.elevation_step_height.JsonNode());
   node.fields!.add("pattern", self.pattern.JsonNode());
   ret node;

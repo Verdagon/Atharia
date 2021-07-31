@@ -5,6 +5,10 @@ struct Vec3i imm {
   z int;
 }
 
+fn Vec3i(v Vec2i, z int) Vec3i {
+  Vec3i(v.x, v.y, z)
+}
+
 // using System;
 // using System.Collections;
 

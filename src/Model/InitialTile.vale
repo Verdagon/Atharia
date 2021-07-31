@@ -2,8 +2,8 @@
 struct InitialTile {
   location Location;
   elevation int;
-  topColor IVec4iAnimation;
-  sideColor IVec4iAnimation;
+  topColor Vec4iAnimation;
+  sideColor Vec4iAnimation;
   //maybeOverlaySymbol InitialSymbol;
   //maybeFeatureSymbol InitialSymbol;
   //itemIdToSymbol List<[ulong, InitialSymbol]>;

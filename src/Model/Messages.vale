@@ -26,31 +26,31 @@
 //  vassert(fadeOutEndTimeMs <= 0);
 //}
 
-interface IDominoMessage {
+interface IDominoCommand {
 }
 
-impl IDominoMessage for SetupGameMessage;
-struct SetupGameMessage {
-  camera_position Vec3i;
-  lookat_offset_to_camera Vec3i;
+impl IDominoCommand for SetupGameCommand;
+struct SetupGameCommand {
+  look_at Vec3i;
+  look_at_offset_to_camera Vec3i;
   elevation_step_height int;
   pattern Pattern;
 }
 
-impl IDominoMessage for CreateTileMessage;
-struct CreateTileMessage {
+impl IDominoCommand for CreateTileCommand;
+struct CreateTileCommand {
   newTileId int; //u64;
   initialTile InitialTile;
 }
 
-//impl IDominoMessage for CreateUnitMessage;
-//struct CreateUnitMessage {
+//impl IDominoCommand for CreateUnitCommand;
+//struct CreateUnitCommand {
 //  id u64;
 //  initialUnit InitialUnit;
 //}
 
-//impl IDominoMessage for MakePanelMessage;
-//struct MakePanelMessage {
+//impl IDominoCommand for MakePanelCommand;
+//struct MakePanelCommand {
 //  id u64;
 //  panelGXInScreen int;
 //  panelGYInScreen int;
@@ -58,39 +58,39 @@ struct CreateTileMessage {
 //  panelGH int;
 //}
 
-//impl IDominoMessage for ScheduleCloseMessage;
-//struct ScheduleCloseMessage {
+//impl IDominoCommand for ScheduleCloseCommand;
+//struct ScheduleCloseCommand {
 //  viewId u64;
 //  startMsFromNow i64;
 //}
 
-//impl IDominoMessage for RemoveViewMessage;
-//struct RemoveViewMessage {
+//impl IDominoCommand for RemoveViewCommand;
+//struct RemoveViewCommand {
 //  panelId u64;
 //  viewId u64;
 //}
 
-//impl IDominoMessage for SetOpacityMessage;
-//struct SetOpacityMessage {
+//impl IDominoCommand for SetOpacityCommand;
+//struct SetOpacityCommand {
 //  viewId u64;
 //  id int;
 //  ratio int;
 //}
 
-//impl IDominoMessage for SetFadeOutMessage;
-//struct SetFadeOutMessage {
+//impl IDominoCommand for SetFadeOutCommand;
+//struct SetFadeOutCommand {
 //  id u64;
 //  fadeOut FadeOut;
 //}
 
-//impl IDominoMessage for SetFadeInMessage;
-//struct SetFadeInMessage {
+//impl IDominoCommand for SetFadeInCommand;
+//struct SetFadeInCommand {
 //  id u64;
 //  fadeIn FadeIn;
 //}
 
-//impl IDominoMessage for AddButtonMessage;
-//struct AddButtonMessage {
+//impl IDominoCommand for AddButtonCommand;
+//struct AddButtonCommand {
 //  newViewId u64;
 //  parentViewId u64;
 //  x int;
@@ -106,8 +106,8 @@ struct CreateTileMessage {
 //  onMouseOut u64;
 //}
 
-//impl IDominoMessage for AddRectangleMessage;
-//struct AddRectangleMessage {
+//impl IDominoCommand for AddRectangleCommand;
+//struct AddRectangleCommand {
 //  newViewId u64;
 //  parentViewId u64;
 //  x int;
@@ -119,8 +119,8 @@ struct CreateTileMessage {
 //  borderColor Vec4i;
 //}
 
-//impl IDominoMessage for AddSymbolMessage;
-//struct AddSymbolMessage {
+//impl IDominoCommand for AddSymbolCommand;
+//struct AddSymbolCommand {
 //  newViewId u64;
 //  parentViewId u64;
 //  x int;
@@ -132,83 +132,83 @@ struct CreateTileMessage {
 //  centered bool;
 //}
 
-//impl IDominoMessage for ShowPrismMessage;
-//struct ShowPrismMessage {
+//impl IDominoCommand for ShowPrismCommand;
+//struct ShowPrismCommand {
 //  tileViewId u64;
 //  prismDescription InitialSymbol;
 //  prismOverlayDescription InitialSymbol;
 //}
-//impl IDominoMessage for FadeInThenOutMessage;
-//struct FadeInThenOutMessage {
+//impl IDominoCommand for FadeInThenOutCommand;
+//struct FadeInThenOutCommand {
 //  tileViewId u64;
 //  inDurationMs i64;
 //  outDurationMs i64;
 //}
-//impl IDominoMessage for ShowRuneMessage;
-//struct ShowRuneMessage {
+//impl IDominoCommand for ShowRuneCommand;
+//struct ShowRuneCommand {
 //  tileId u64;
 //  symbol InitialSymbol;
 //}
-//impl IDominoMessage for SetOverlayMessage;
-//struct SetOverlayMessage {
+//impl IDominoCommand for SetOverlayCommand;
+//struct SetOverlayCommand {
 //  tileId u64;
 //  symbol InitialSymbol;
 //}
-//impl IDominoMessage for SetFeatureMessage;
-//struct SetFeatureMessage {
+//impl IDominoCommand for SetFeatureCommand;
+//struct SetFeatureCommand {
 //  tileId u64;
 //  symbol InitialSymbol;
 //}
-//impl IDominoMessage for SetCliffColorMessage;
-//struct SetCliffColorMessage {
+//impl IDominoCommand for SetCliffColorCommand;
+//struct SetCliffColorCommand {
 //  tileViewId u64;
-//  sideColor IVec4iAnimation;
+//  sideColor Vec4iAnimation;
 //}
-//impl IDominoMessage for SetSurfaceColorMessage;
-//struct SetSurfaceColorMessage {
+//impl IDominoCommand for SetSurfaceColorCommand;
+//struct SetSurfaceColorCommand {
 //  tileViewId u64;
-//  frontColor IVec4iAnimation;
+//  frontColor Vec4iAnimation;
 //}
-//impl IDominoMessage for SetElevationMessage;
-//struct SetElevationMessage {
+//impl IDominoCommand for SetElevationCommand;
+//struct SetElevationCommand {
 //  tileViewId u64;
 //  elevation int;
 //}
-//impl IDominoMessage for RemoveItemMessage;
-//struct RemoveItemMessage {
+//impl IDominoCommand for RemoveItemCommand;
+//struct RemoveItemCommand {
 //  tileViewId u64;
 //  itemId u64;
 //}
-//impl IDominoMessage for ClearItemsMessage;
-//struct ClearItemsMessage {
+//impl IDominoCommand for ClearItemsCommand;
+//struct ClearItemsCommand {
 //  tileViewId u64;
 //}
 
-//impl IDominoMessage for AddItemMessage;
-//struct AddItemMessage {
+//impl IDominoCommand for AddItemCommand;
+//struct AddItemCommand {
 //  tileViewId u64;
 //  itemId u64;
 //  symbolDescription InitialSymbol;
 //}
 
-//impl IDominoMessage for AddDetailMessage;
-//struct AddDetailMessage {
+//impl IDominoCommand for AddDetailCommand;
+//struct AddDetailCommand {
 //  unitViewId u64;
 //  detailId u64;
 //  symbolDescription InitialSymbol;
 //}
 
-//impl IDominoMessage for RemoveDetailMessage;
-//struct RemoveDetailMessage {
+//impl IDominoCommand for RemoveDetailCommand;
+//struct RemoveDetailCommand {
 //  unitViewId u64;
 //  detailId u64;
 //}
 
-//impl IDominoMessage for DestroyTileMessage;
-//struct DestroyTileMessage {
+//impl IDominoCommand for DestroyTileCommand;
+//struct DestroyTileCommand {
 //  tileViewId u64;
 //}
-//impl IDominoMessage for DestroyUnitMessage;
-//struct DestroyUnitMessage {
+//impl IDominoCommand for DestroyUnitCommand;
+//struct DestroyUnitCommand {
 //  unitId u64;
 //}

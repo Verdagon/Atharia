@@ -7,6 +7,11 @@ struct Pattern {
   y_offset Vec2i;
 }
 
+fn getTileCenter(self &Pattern, loc Location) Vec2i {
+  ret self.x_offset * loc.group_x +
+      self.y_offset * loc.group_y +
+      self.pattern_tiles.get(loc.index_in_group).translate;
+}
 
 // using System;
 // using System.Collections;
@@ -31,16 +36,16 @@ struct Pattern {
 //   }
 //   private readonly int hashCode;
 //          public readonly string name;
-//   public readonly Vec2ImmListImmList shapeIndexToCorners;
+//   public readonly Vec2iImmListImmList shapeIndexToCorners;
 //   public readonly PatternTileImmList patternTiles;
-//   public readonly Vec2 xOffset;
-//   public readonly Vec2 yOffset;
+//   public readonly Vec2i xOffset;
+//   public readonly Vec2i yOffset;
 //   public Pattern(
 //       string name,
-//       Vec2ImmListImmList shapeIndexToCorners,
+//       Vec2iImmListImmList shapeIndexToCorners,
 //       PatternTileImmList patternTiles,
-//       Vec2 xOffset,
-//       Vec2 yOffset) {
+//       Vec2i xOffset,
+//       Vec2i yOffset) {
 //     this.name = name;
 //     this.shapeIndexToCorners = shapeIndexToCorners;
 //     this.patternTiles = patternTiles;
@@ -119,13 +124,13 @@ struct Pattern {
 //       source.Expect("(");
 //       var name = source.ParseStr();
 //       source.Expect(",");
-//       var shapeIndexToCorners = Vec2ImmListImmList.Parse(source);
+//       var shapeIndexToCorners = Vec2iImmListImmList.Parse(source);
 //       source.Expect(",");
 //       var patternTiles = PatternTileImmList.Parse(source);
 //       source.Expect(",");
-//       var xOffset = Vec2.Parse(source);
+//       var xOffset = Vec2i.Parse(source);
 //       source.Expect(",");
-//       var yOffset = Vec2.Parse(source);
+//       var yOffset = Vec2i.Parse(source);
 //       source.Expect(")");
 //       return new Pattern(name, shapeIndexToCorners, patternTiles, xOffset, yOffset);
 //   }
@@ -135,28 +140,23 @@ struct Pattern {
 //       return GetTileCenter(locA).distance(GetTileCenter(locB));
 //     }
 
-//     public Vec2 GetTileCenter(Location loc) {
-//       return xOffset.mul(loc.groupX)
-//           .plus(yOffset.mul(loc.groupY))
-//           .plus(patternTiles[loc.indexInGroup].translate);
-//     }
 
 //     private static double DegreesToRadians(double angle) {
 //       return Math.PI * angle / 180.0;
 //     }
 
-//     public List<Vec2> GetRelativeCornerPositions(Location loc) {
+//     public List<Vec2i> GetRelativeCornerPositions(Location loc) {
 //       var patternTile = patternTiles[loc.indexInGroup];
 //       int shapeIndex = patternTile.shapeIndex;
 //       double rotateRadians = patternTile.rotateRadianards / 1000f;
 //       var corners = shapeIndexToCorners[shapeIndex];
 
-//       List<Vec2> results = new List<Vec2>();
+//       List<Vec2i> results = new List<Vec2i>();
 
 //       for (int i = 0; i < corners.Count; i++) {
-//         Vec2 unrotatedCorner = corners[i];
-//         Vec2 rotatedCorner =
-//             new Vec2(
+//         Vec2i unrotatedCorner = corners[i];
+//         Vec2i rotatedCorner =
+//             new Vec2i(
 //                 (int)(unrotatedCorner.x * Math.Cos(rotateRadians) -
 //                     unrotatedCorner.y * Math.Sin(rotateRadians)),
 //                 (int)(unrotatedCorner.y * Math.Cos(rotateRadians) +
@@ -167,9 +167,9 @@ struct Pattern {
 //       return results;
 //     }
 
-//     public List<Vec2> GetCornerPositions(Location loc) {
+//     public List<Vec2i> GetCornerPositions(Location loc) {
 //       var center = GetTileCenter(loc);
-//       List<Vec2> results = new List<Vec2>();
+//       List<Vec2i> results = new List<Vec2i>();
 //       foreach (var relativeCorner in GetRelativeCornerPositions(loc)) {
 //         results.Add(center.plus(relativeCorner));
 //       }

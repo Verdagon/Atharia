@@ -6,17 +6,17 @@
 
 // struct InitialSymbolGlyph imm {
 //   symbolId SymbolId;
-//   color IVec4iAnimation;
+//   color Vec4iAnimation;
 // }
 
 // struct InitialSymbolOutline imm {
 //   mode OutlineMode;
-//   color IVec4iAnimation;
+//   color Vec4iAnimation;
 // }
 
 // struct InitialSymbolSides imm {
 //   depthPercent int;
-//   color IVec4iAnimation;
+//   color Vec4iAnimation;
 // }
 
 // struct InitialSymbol imm {
