@@ -133,7 +133,7 @@ func SetSelection(
       HashSet<Location, LocationHasher, LocationEquator>(
          LocationHasher(), LocationEquator(), &locations);
 
-  server.terrainController!.SetHighlightedLocations(locations);
+  server.terrainController!.SetSelectedLocations(locations);
 
   //SortedSet<string> commonMembers = null;
   //foreach (var loc in selectedLocations) {

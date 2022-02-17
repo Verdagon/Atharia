@@ -1,3 +1,7 @@
+import stdlib.collections.hashset.*;
+import stdlib.collections.hashmap.*;
+import stdlib.collections.list.*;
+import stdlib.optutils.*;
 
 // public delegate void OnTerrainTileHovered(Location location);
 // public delegate void OnTerrainTileClicked(Location location);
@@ -69,24 +73,21 @@ TerrainController {
 //     }
 //   }
 // 
-func UpdateLocationHighlighted(self &!TerrainController, maybe_location &Opt<Location>) {
-  highlighted = maybe_location == &self.maybeMouseHighlightedLocation;
-  // selected = self.selectedLocations.has(location);
-  if not maybe_location.isEmpty() {
-    location = maybe_location.get();
-    maybeNewMousedTerrainTilePresenter = self.tilePresenters!.get(location);
-    if not maybeNewMousedTerrainTilePresenter.isEmpty() {
-      newMousedTerrainTilePresenter = &!maybeNewMousedTerrainTilePresenter!.get();
-      newMousedTerrainTilePresenter!.SetHighlighted(highlighted);
-      // newMousedTerrainTilePresenter.SetSelected(selected);
-    }
+func UpdateLocationHighlighted(self &!TerrainController, location Location) {
+  highlighted = &Some(location) == &self.maybeMouseHighlightedLocation;
+  selected = self.selectedLocations.contains(location);
+  maybeNewMousedTerrainTilePresenter = self.tilePresenters!.get(location);
+  if not maybeNewMousedTerrainTilePresenter.isEmpty() {
+    newMousedTerrainTilePresenter = &!maybeNewMousedTerrainTilePresenter!.get();
+    newMousedTerrainTilePresenter!.SetHighlighted(highlighted);
+    newMousedTerrainTilePresenter!.SetSelected(selected);
+  }
 
-    maybeNewMousedPhantomTilePresenter = self.tilePresenters!.get(location);
-    if not maybeNewMousedPhantomTilePresenter.isEmpty() {
-      newMousedPhantomTilePresenter = &!maybeNewMousedPhantomTilePresenter!.get();
-      newMousedPhantomTilePresenter!.SetHighlighted(highlighted);
-      // Cant select a phantom tile
-    }
+  maybeNewMousedPhantomTilePresenter = self.tilePresenters!.get(location);
+  if not maybeNewMousedPhantomTilePresenter.isEmpty() {
+    newMousedPhantomTilePresenter = &!maybeNewMousedPhantomTilePresenter!.get();
+    newMousedPhantomTilePresenter!.SetHighlighted(highlighted);
+    // Cant select a phantom tile
   }
 }
 // 
@@ -156,11 +157,11 @@ func AddTerrainTile(self &!TerrainController, location Location, tile &!TerrainT
 //     phantomTilePresenters.Add(location, presenter);
 //   }
 // 
-func SetHighlightedLocations(
+func SetSelectedLocations(
     self &!TerrainController,
     locations HashSet<Location, LocationHasher, LocationEquator>) {
-  [addedLocations, removedLocations] =
-    locations.diff(self.selectedLocations, locations);
+  addedLocations = diff_iter(&locations, &self.selectedLocations).List();
+  removedLocations = diff_iter(&self.selectedLocations, &locations).List();
   set self.selectedLocations = locations;
   foreach addedLocation in addedLocations {
     self!.UpdateLocationHighlighted(addedLocation);
@@ -190,8 +191,12 @@ func SetHoveredLocation(self &!TerrainController, newMaybeMouseHighlightedLocati
   if newMaybeMouseHighlightedLocation != &self.maybeMouseHighlightedLocation {
     oldMaybeMouseHighlightedLocation =
       set self.maybeMouseHighlightedLocation = newMaybeMouseHighlightedLocation.clone();
-    self!.UpdateLocationHighlighted(&oldMaybeMouseHighlightedLocation);
-    self!.UpdateLocationHighlighted(newMaybeMouseHighlightedLocation);
+    if oldMaybeMouseHighlightedLocation.nonEmpty() {
+      self!.UpdateLocationHighlighted(oldMaybeMouseHighlightedLocation.get());
+    }
+    if newMaybeMouseHighlightedLocation.nonEmpty() {
+      self!.UpdateLocationHighlighted(newMaybeMouseHighlightedLocation.get());
+    }
   }
 }
 

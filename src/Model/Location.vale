@@ -26,6 +26,10 @@ func __call(this &LocationEquator, a Location, b Location) bool {
   (a.group_x == b.group_x) and (a.group_y == b.group_y) and (a.index_in_group == b.index_in_group)
 }
 
+func +(s str, loc Location) str {
+  s + ("[{loc.group_x}, {loc.group_y}, {loc.index_in_group}]")
+}
+
 
 // using System;
 // using System.Collections;

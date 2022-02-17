@@ -107,14 +107,16 @@ TerrainTilePresenter {
 //     }
 // 
 func SetHighlighted(self &!TerrainTilePresenter, highlighted bool) {
+  println("Setting location {self.location} to highlighted={highlighted})");
   set self.highlighted = highlighted;
   self!.RefreshSurfaceColor();
 }
-//     public void SetSelected(bool selected) {
-//       this.selected = selected;
-//       RefreshSurfaceColor();
-//     }
-// 
+func SetSelected(self &!TerrainTilePresenter, selected bool) {
+  println("Setting location {self.location} to selected={selected})");
+  set self.selected = selected;
+  self!.RefreshSurfaceColor();
+}
+
 func RefreshSurfaceColor(self &!TerrainTilePresenter) {
   vassert(self.membersFrontColors.len() > 0, "No front color!");
   self.domino!.SetSurfaceColor(
