@@ -1,18 +1,24 @@
 
-fn Vec4iWhite() Vec4i { Vec4i(255, 255, 255, 255) }
-fn Vec4iCyan() Vec4i { Vec4i(0, 255, 255, 255) }
-fn Vec4iRed() Vec4i { Vec4i(255, 0, 0, 255) }
-fn Vec4iBlack() Vec4i { Vec4i(0, 0, 0, 255) }
-fn Vec4iBlue() Vec4i { Vec4i(0, 0, 255, 255) }
+func Vec4iWhite() Vec4i { Vec4i(255, 255, 255, 255) }
+func Vec4iCyan() Vec4i { Vec4i(0, 255, 255, 255) }
+func Vec4iRed() Vec4i { Vec4i(255, 0, 0, 255) }
+func Vec4iBlack() Vec4i { Vec4i(0, 0, 0, 255) }
+func Vec4iBlue() Vec4i { Vec4i(0, 0, 255, 255) }
 
-struct Vec4i {
+struct Vec4i imm {
   x int;
   y int;
   z int;
   w int;
 }
 
-fn all(n int) Vec4i { Vec4i(n, n, n, n) }
+func all(n int) Vec4i { Vec4i(n, n, n, n) }
+
+func ==(a Vec4i, b Vec4i) bool {
+  Vec4i[ax, ay, az, aw] = a;
+  Vec4i[bx, by, bz, bw] = b;
+  ret ax == bx and ay == by and az == bz and aw == bw;
+}
 
 //   public static bool operator==(Vec4i a, Vec4i b) {
 //     return a.Equals(b);

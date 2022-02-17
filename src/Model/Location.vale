@@ -5,8 +5,15 @@ struct Location imm {
   index_in_group int;
 }
 
+func clone(a Location) Location { a }
+func ==(a Location, b Location) bool {
+  [a_group_x, a_group_y, a_index_in_group] = a;
+  [b_group_x, b_group_y, b_index_in_group] = b;
+  ret a_group_x == b_group_x and a_group_y == b_group_y and a_index_in_group == b_index_in_group;
+}
+
 struct LocationHasher { }
-fn __call(this &LocationHasher, loc Location) int {
+func __call(this &LocationHasher, loc Location) int {
   hash = 0;
   set hash = 33 * hash + loc.group_x;
   set hash = 37 * hash + loc.group_y;
@@ -15,7 +22,7 @@ fn __call(this &LocationHasher, loc Location) int {
 }
 
 struct LocationEquator { }
-fn __call(this &LocationEquator, a Location, b Location) bool {
+func __call(this &LocationEquator, a Location, b Location) bool {
   (a.group_x == b.group_x) and (a.group_y == b.group_y) and (a.index_in_group == b.index_in_group)
 }
 

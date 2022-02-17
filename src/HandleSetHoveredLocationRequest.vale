@@ -1,0 +1,18 @@
+
+struct SetHoveredLocationRequest {
+  tile_id int;
+  location Opt<Location>;
+}
+
+func HandleSetHoveredLocationRequest(
+  server &!EditorInstance,
+  request &SetHoveredLocationRequest)
+Result<(), str> {
+  domino = &!server.domino;
+
+  println("In HandleSetHoveredLocationRequest");
+
+  server.terrainController!.SetHoveredLocation(request.location);
+
+  ret Ok<(), str>(());
+}

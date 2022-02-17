@@ -1,0 +1,27 @@
+
+struct LocationMouseDownRequest {
+  tile_id int;
+  location Location;
+}
+
+func HandleLocationMouseDownRequest(
+  server &!EditorInstance,
+  request &LocationMouseDownRequest)
+Result<(), str> {
+  domino = &!server.domino;
+
+  println("In HandleLocationMouseDownRequest");
+  location = request.location;
+
+  newSelection =
+    HashSet<Location, LocationHasher, LocationEquator>(
+      LocationHasher(), LocationEquator(), &server.selectedLocations);
+  if newSelection.contains(location) {
+    newSelection!.remove(location);
+  } else {
+    newSelection!.add(location);
+  }
+  server!.SetSelection(newSelection);
+
+  ret Ok<(), str>(());
+}

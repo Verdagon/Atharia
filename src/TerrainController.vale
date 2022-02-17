@@ -1,0 +1,207 @@
+
+// public delegate void OnTerrainTileHovered(Location location);
+// public delegate void OnTerrainTileClicked(Location location);
+// public delegate void OnPhantomTileClicked(Location location);
+// 
+struct TerrainController {
+//   public OnTerrainTileHovered TerrainTileHovered;
+//   public OnTerrainTileClicked TerrainTileClicked;
+//   public OnPhantomTileClicked PhantomTileClicked;
+//   
+//   MemberToViewMapper vivimap;
+
+  domino &!GameToDominoConnection;
+  terrain Terrain;
+// 
+  tilePresenters HashMap<Location, TerrainTilePresenter, LocationHasher, LocationEquator>;
+//   Dictionary<Location, PhantomTilePresenter> phantomTilePresenters = new Dictionary<Location, PhantomTilePresenter>();
+// 
+  maybeMouseHighlightedLocation! Opt<Location>;
+  selectedLocations! HashSet<Location, LocationHasher, LocationEquator>;
+}
+
+
+func TerrainController(
+    domino &!GameToDominoConnection,
+    //MemberToViewMapper vivimap,
+    terrain Terrain)
+TerrainController {
+  //this.domino = domino;
+  // this.vivimap = vivimap;
+  //this.terrain = terrain;
+
+  println("TerrainController A");
+
+  self =
+    TerrainController(
+      domino,
+      terrain,
+      HashMap<Location, TerrainTilePresenter, LocationHasher, LocationEquator>(
+        LocationHasher(), LocationEquator()),
+      None<Location>(),
+      HashSet<Location, LocationHasher, LocationEquator>(
+        LocationHasher(), LocationEquator()));
+
+  println("TerrainController B");
+
+  foreach [location Location, tile &!TerrainTile] in &!self.terrain.tiles {
+    self!.AddTerrainTile(location, &!tile);
+  }
+
+  println("TerrainController C");
+
+  // RefreshPhantomTiles();
+
+  ret self;
+}
+// 
+//   public void AddTile(TerrainTilePresenter presenter) {
+//     tilePresenters.Add(presenter.location, presenter);
+//   }
+// 
+//   public Location GetMaybeMouseHighlightLocation() {
+//     return maybeMouseHighlightedLocation;
+//   }
+// 
+//   public void DestroyTerrainController() {
+//     foreach (var entry in tilePresenters) {
+//       entry.Value.DestroyTerrainTilePresenter();
+//     }
+//   }
+// 
+func UpdateLocationHighlighted(self &!TerrainController, maybe_location &Opt<Location>) {
+  highlighted = maybe_location == &self.maybeMouseHighlightedLocation;
+  // selected = self.selectedLocations.has(location);
+  if not maybe_location.isEmpty() {
+    location = maybe_location.get();
+    maybeNewMousedTerrainTilePresenter = self.tilePresenters!.get(location);
+    if not maybeNewMousedTerrainTilePresenter.isEmpty() {
+      newMousedTerrainTilePresenter = &!maybeNewMousedTerrainTilePresenter!.get();
+      newMousedTerrainTilePresenter!.SetHighlighted(highlighted);
+      // newMousedTerrainTilePresenter.SetSelected(selected);
+    }
+
+    maybeNewMousedPhantomTilePresenter = self.tilePresenters!.get(location);
+    if not maybeNewMousedPhantomTilePresenter.isEmpty() {
+      newMousedPhantomTilePresenter = &!maybeNewMousedPhantomTilePresenter!.get();
+      newMousedPhantomTilePresenter!.SetHighlighted(highlighted);
+      // Cant select a phantom tile
+    }
+  }
+}
+// 
+//   public void AddTile(TerrainTile tile) {
+//     if phantomTilePresenters.TryGetValue(tile.location, out var presenter) {
+//       presenter.DestroyPhantomTilePresenter();
+//       phantomTilePresenters.Remove(tile.location);
+//     }
+//     terrain.tiles.Add(tile.location, tile);
+//     AddTerrainTile(tile.location, terrain.tiles[tile.location]);
+//     RefreshPhantomTiles();
+//   }
+// 
+//   public void RemoveTile(TerrainTile tile) {
+//     tilePresenters.Remove(tile.location);
+//     var newHighlightedLocations = new SortedSet<Location>(selectedLocations);
+//     newHighlightedLocations.Remove(tile.location);
+//     SetHighlightedLocations(newHighlightedLocations);
+//     RefreshPhantomTiles();
+//   }
+// 
+//   public TerrainTilePresenter GetTilePresenter(Location location) {
+//     if tilePresenters.TryGetValue(location, out var presenter) {
+//       return presenter;
+//     }
+//     return null;
+//   }
+// 
+//   private void RefreshPhantomTiles() {
+//     var phantomTileLocations =
+//         terrain.pattern.GetAdjacentLocations(new SortedSet<Location>(terrain.tiles.Keys), false, true);
+//     var previousPhantomTileLocations = phantomTilePresenters.Keys;
+// 
+//     var addedPhantomTileLocations = new SortedSet<Location>(phantomTileLocations);
+//     SetUtils.RemoveAll(addedPhantomTileLocations, previousPhantomTileLocations);
+// 
+//     var removedPhantomTileLocations = new SortedSet<Location>(previousPhantomTileLocations);
+//     SetUtils.RemoveAll(removedPhantomTileLocations, phantomTileLocations);
+// 
+//     foreach (var removedPhantomTileLocation in removedPhantomTileLocations) {
+//       removePhantomTile(removedPhantomTileLocation);
+//     }
+// 
+//     foreach (var addedPhantomTileLocation in addedPhantomTileLocations) {
+//       addPhantomTile(addedPhantomTileLocation);
+//     }
+//   }
+// 
+//   private void removePhantomTile(Location removedPhantomTileLocation) {
+//     phantomTilePresenters[removedPhantomTileLocation].DestroyPhantomTilePresenter();
+//     phantomTilePresenters.Remove(removedPhantomTileLocation);
+//   }
+// 
+func AddTerrainTile(self &!TerrainController, location Location, tile &!TerrainTile) {
+  presenter =
+    TerrainTilePresenter(
+      &!self.domino,
+      // vivimap,
+      &!self.terrain,
+      tile,
+      location);
+  self.tilePresenters!.add(location, presenter);
+}
+// 
+//   private void addPhantomTile(Location location) {
+//     var presenter = new PhantomTilePresenter(domino, terrain.pattern, location, terrain.elevationStepHeight);
+//     phantomTilePresenters.Add(location, presenter);
+//   }
+// 
+func SetHighlightedLocations(
+    self &!TerrainController,
+    locations HashSet<Location, LocationHasher, LocationEquator>) {
+  [addedLocations, removedLocations] =
+    locations.diff(self.selectedLocations, locations);
+  set self.selectedLocations = locations;
+  foreach addedLocation in addedLocations {
+    self!.UpdateLocationHighlighted(addedLocation);
+  }
+  foreach removedLocation in removedLocations {
+    self!.UpdateLocationHighlighted(removedLocation);
+  }
+}
+
+
+func ==<T>(a &Opt<T>, b &Opt<T>) bool {
+  if a.isEmpty() and b.isEmpty() {
+    ret true;
+  }
+  if not a.isEmpty() and not b.isEmpty() {
+    ret a.get() == b.get();
+  }
+  ret false;
+}
+
+abstract func clone<T>(virtual self &Opt<T>) Opt<T>;
+func clone<T>(self &None<T> impl Opt<T>) Opt<T> { None<T>() }
+func clone<T>(self &Some<T> impl Opt<T>) Opt<T> { Some<T>(self.get().clone()) }
+
+
+func SetHoveredLocation(self &!TerrainController, newMaybeMouseHighlightedLocation &Opt<Location>) {
+  if newMaybeMouseHighlightedLocation != &self.maybeMouseHighlightedLocation {
+    oldMaybeMouseHighlightedLocation =
+      set self.maybeMouseHighlightedLocation = newMaybeMouseHighlightedLocation.clone();
+    self!.UpdateLocationHighlighted(&oldMaybeMouseHighlightedLocation);
+    self!.UpdateLocationHighlighted(newMaybeMouseHighlightedLocation);
+  }
+}
+
+// seems needless
+//func LocationMouseDown(tileViewId ulong, location Location) {
+//  if maybeTilePresenter = tilePresenters.get(maybeMouseHighlightedLocation); not maybeTilePresenter.isEmpty() {
+//    tilePresenter = (maybeTilePresenter).get();
+//    TerrainTileClicked?.Invoke(maybeMouseHighlightedLocation);
+//  }
+//  //if phantomTilePresenters.TryGetValue(maybeMouseHighlightedLocation, out var newMousedPhantomTilePresenter) {
+//  //  PhantomTileClicked?.Invoke(maybeMouseHighlightedLocation);
+//  //}
+//}

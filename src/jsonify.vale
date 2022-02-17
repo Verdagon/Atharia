@@ -1,12 +1,19 @@
 
-fn JsonNode(self &Vec2i) JsonNode {
+func JsonNode(i i64) JsonNumber {
+  if (i >= 4294967296i64) {
+    panic(i + " is too big for JSON!");
+  }
+  ret JsonNumber(TruncateI64ToI32(i));
+}
+
+func JsonNode(self &Vec2i) JsonNode {
   node = JsonObject();
   node.fields!.add("x", self.x.JsonNode());
   node.fields!.add("y", self.y.JsonNode());
   ret node;
 }
 
-fn JsonNode(self &Vec3i) JsonNode {
+func JsonNode(self &Vec3i) JsonNode {
   node = JsonObject();
   node.fields!.add("x", self.x.JsonNode());
   node.fields!.add("y", self.y.JsonNode());
@@ -14,7 +21,7 @@ fn JsonNode(self &Vec3i) JsonNode {
   ret node;
 }
 
-fn JsonNode(self &Vec4i) JsonNode {
+func JsonNode(self &Vec4i) JsonNode {
   node = JsonObject();
   node.fields!.add("x", self.x.JsonNode());
   node.fields!.add("y", self.y.JsonNode());
@@ -23,15 +30,36 @@ fn JsonNode(self &Vec4i) JsonNode {
   ret node;
 }
 
-fn JsonNode(virtual self &Vec4iAnimation) JsonNode abstract;
-fn JsonNode(self &ConstantVec4iAnimation impl Vec4iAnimation) JsonNode {
+abstract func JsonNode(virtual self &Vec4iAnimation) JsonNode;
+func JsonNode(self &ConstantVec4iAnimation impl Vec4iAnimation) JsonNode {
   node = JsonObject();
   node.fields!.add("Vec4iAnimation", "ConstantVec4iAnimation".JsonNode());
   node.fields!.add("val", self.val.JsonNode());
   ret node;
 }
+func JsonNode(self &MultiplyVec4iAnimation impl Vec4iAnimation) JsonNode {
+  node = JsonObject();
+  node.fields!.add("Vec4iAnimation", "MultiplyVec4iAnimation".JsonNode());
+  node.fields!.add("left", self.left.JsonNode());
+  node.fields!.add("right", self.right.JsonNode());
+  ret node;
+}
+func JsonNode(self &AddVec4iAnimation impl Vec4iAnimation) JsonNode {
+  node = JsonObject();
+  node.fields!.add("Vec4iAnimation", "AddVec4iAnimation".JsonNode());
+  node.fields!.add("left", self.left.JsonNode());
+  node.fields!.add("right", self.right.JsonNode());
+  ret node;
+}
+func JsonNode(self &DivideVec4iAnimation impl Vec4iAnimation) JsonNode {
+  node = JsonObject();
+  node.fields!.add("Vec4iAnimation", "DivideVec4iAnimation".JsonNode());
+  node.fields!.add("left", self.left.JsonNode());
+  node.fields!.add("right", self.right.JsonNode());
+  ret node;
+}
 
-fn JsonNode(self &Location) JsonNode {
+func JsonNode(self &Location) JsonNode {
   node = JsonObject();
   node.fields!.add("group_x", self.group_x.JsonNode());
   node.fields!.add("group_y", self.group_y.JsonNode());
@@ -39,7 +67,7 @@ fn JsonNode(self &Location) JsonNode {
   ret node;
 }
 
-fn JsonNode(self &InitialTile) JsonNode {
+func JsonNode(self &InitialTile) JsonNode {
   node = JsonObject();
   node.fields!.add("location", self.location.JsonNode());
   node.fields!.add("elevation", self.elevation.JsonNode());
@@ -48,15 +76,15 @@ fn JsonNode(self &InitialTile) JsonNode {
   ret node;
 }
 
-fn JsonNode(virtual self &IDominoCommand) JsonNode abstract;
-fn JsonNode(self &CreateTileCommand impl IDominoCommand) JsonNode {
+abstract func JsonNode(virtual self &IDominoCommand) JsonNode;
+func JsonNode(self &CreateTileCommand impl IDominoCommand) JsonNode {
   node = JsonObject();
   node.fields!.add("command_type", "CreateTile".JsonNode());
   node.fields!.add("tile_id", self.newTileId.JsonNode());
   node.fields!.add("initial_tile", self.initialTile.JsonNode());
   ret node;
 }
-fn JsonNode(self &SetupGameCommand impl IDominoCommand) JsonNode {
+func JsonNode(self &SetupGameCommand impl IDominoCommand) JsonNode {
   node = JsonObject();
   node.fields!.add("command_type", "SetupGame".JsonNode());
   node.fields!.add("look_at", self.look_at.JsonNode());
@@ -65,15 +93,22 @@ fn JsonNode(self &SetupGameCommand impl IDominoCommand) JsonNode {
   node.fields!.add("pattern", self.pattern.JsonNode());
   ret node;
 }
+func JsonNode(self &SetSurfaceColorCommand impl IDominoCommand) JsonNode {
+  node = JsonObject();
+  node.fields!.add("command_type", "SetSurfaceColor".JsonNode());
+  node.fields!.add("tile_id", self.tileViewId.JsonNode());
+  node.fields!.add("color", self.frontColor.JsonNode());
+  ret node;
+}
 
-fn JsonNode<T>(list &List<T>) JsonNode {
+func JsonNode<T>(list &List<T>) JsonNode {
   ret JsonArray(
-      [vary *](
+      Array<mut, JsonNode>(
           list.len(),
           &!{ list.get(_).JsonNode() }));
 }
 
-fn JsonNode(self &Pattern) JsonNode {
+func JsonNode(self &Pattern) JsonNode {
   node = JsonObject();
   node.fields!.add("name", self.name.JsonNode());
   node.fields!.add("shape_index_to_corners", self.shape_index_to_corners.JsonNode());
@@ -83,7 +118,7 @@ fn JsonNode(self &Pattern) JsonNode {
   ret node;
 }
 
-fn JsonNode(self &PatternTile) JsonNode {
+func JsonNode(self &PatternTile) JsonNode {
   node = JsonObject();
   node.fields!.add("shape_index", self.shape_index.JsonNode());
   node.fields!.add("rotate_radianards", self.rotate_radianards.JsonNode());
@@ -93,7 +128,7 @@ fn JsonNode(self &PatternTile) JsonNode {
   ret node;
 }
 
-fn JsonNode(self &PatternSideAdjacency) JsonNode {
+func JsonNode(self &PatternSideAdjacency) JsonNode {
   node = JsonObject();
   node.fields!.add("group_relative_x", self.group_relative_x.JsonNode());
   node.fields!.add("group_relative_y", self.group_relative_y.JsonNode());
@@ -102,7 +137,7 @@ fn JsonNode(self &PatternSideAdjacency) JsonNode {
   ret node;
 }
 
-fn JsonNode(self &PatternCornerAdjacency) JsonNode {
+func JsonNode(self &PatternCornerAdjacency) JsonNode {
   node = JsonObject();
   node.fields!.add("group_relative_x", self.group_relative_x.JsonNode());
   node.fields!.add("group_relative_y", self.group_relative_y.JsonNode());

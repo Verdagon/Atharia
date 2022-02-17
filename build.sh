@@ -1,1 +1,18 @@
-python3 ~/Vale/release-unix/valec.py build atharia atharia:src rocketvale:~/RocketVale/src rocketvale:~/RocketVale/src/native/rust/target/debug/librocketvale.a valejson:~/ValeJSON/src stdlib:~/stdlib/src parseiter:~/ParseIter/src --output-dir build --add-exports-include-path --region-override resilient-v3
+
+VALEC_DIR="$1"
+if [ "$VALEC_DIR" == "" ]; then
+  echo "Please supply the bootstrapping valec directory."
+  echo "Example: ~/TheValeCompiler"
+  exit
+fi
+shift;
+
+STDLIB_DIR="$1"
+if [ "$STDLIB_DIR" == "" ]; then
+  echo "Please supply the stdlib directory."
+  echo "Example: ~/stdlib"
+  exit
+fi
+shift;
+
+$VALEC_DIR/valec build stdlib=$STDLIB_DIR/src atharia=src rocketvale=~/RocketVale/src rocketvale=~/RocketVale/src/native/rust/target/debug/librocketvale.a valejson=~/ValeJSON/src parseiter=~/ParseIter/src --output_dir build --region_override assist --llvm_ir true

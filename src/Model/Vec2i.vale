@@ -4,19 +4,19 @@ struct Vec2i imm {
   y int;
 }
 
-fn +(a Vec2i, b Vec2i) Vec2i {
+func +(a Vec2i, b Vec2i) Vec2i {
   Vec2i(a.x + b.x, a.y + b.y)
 }
 
-fn -(a Vec2i, b Vec2i) Vec2i {
+func -(a Vec2i, b Vec2i) Vec2i {
   Vec2i(a.x - b.x, a.y - b.y)
 }
 
-fn *(a Vec2i, b int) Vec2i {
+func *(a Vec2i, b int) Vec2i {
   Vec2i(a.x * b, a.y * b)
 }
 
-fn /(a Vec2i, b int) Vec2i {
+func /(a Vec2i, b int) Vec2i {
   Vec2i(a.x / b, a.y / b)
 }
 

@@ -5,12 +5,11 @@ struct Terrain {
   tiles HashMap<Location, TerrainTile, LocationHasher, LocationEquator>;
 }
 
-
-// fn TileExists(location Location) bool {
+// func TileExists(location Location) bool {
 //   ret tiles.ContainsKey(location);
 // }
 
-// fn GetAdjacentExistingLocations(
+// func GetAdjacentExistingLocations(
 //     self &Terrain,
 //     loc Location,
 //     adjacentCornersToo bool)
@@ -24,7 +23,7 @@ struct Terrain {
 //   ret result;
 // }
 
-// fn GetAdjacentExistingLocations(
+// func GetAdjacentExistingLocations(
 //     self &Terrain,
 //     sourceLocs HashSet<Location>,
 //     includeSourceLocs bool,
@@ -40,7 +39,7 @@ struct Terrain {
 //   ret result;
 // }
 
-// fn GetTileCenter(loc Location) Vec3 {
+// func GetTileCenter(loc Location) Vec3 {
 //   var terrainTile = tiles[loc];
 //   var positionVec2 = pattern.GetTileCenter(loc);
 //   ret Vec3(
@@ -49,7 +48,7 @@ struct Terrain {
 //       terrainTile.elevation * elevationStepHeight);
 // }
 
-// fn GetElevationDifference(Location locA, Location locB) int {
+// func GetElevationDifference(Location locA, Location locB) int {
 //   ret Math.Abs(
 //       tiles[locA].elevation -
 //       tiles[locB].elevation);

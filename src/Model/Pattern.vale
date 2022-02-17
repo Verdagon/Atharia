@@ -7,7 +7,7 @@ struct Pattern {
   y_offset Vec2i;
 }
 
-fn getTileCenter(self &Pattern, loc Location) Vec2i {
+func getTileCenter(self &Pattern, loc Location) Vec2i {
   ret self.x_offset * loc.group_x +
       self.y_offset * loc.group_y +
       self.pattern_tiles.get(loc.index_in_group).translate;

@@ -1,0 +1,47 @@
+
+struct StartRequest {
+  screen_gw int;
+  screen_gh int;
+}
+
+func HandleStartRequest(
+  start_request &StartRequest)
+Result<EditorInstance, str> {
+
+  domino = GameToDominoConnection();
+
+  pattern = make_pentagon_9_pattern();
+
+  cameraLookAtPosition =
+      pattern.getTileCenter(Location(0, 0, 0)).Vec3i(0); //terrain.GetTileCenter(startLocation);
+  lookatOffsetToCamera = Vec3i(0, 5000, -10000);
+
+  domino!.SetupGame(
+      cameraLookAtPosition,
+      lookatOffsetToCamera,
+      200,
+      pattern);
+
+  terrain =
+    Terrain(
+      make_pentagon_9_pattern(),
+      200,
+      HashMap<Location, TerrainTile, LocationHasher, LocationEquator>(
+        LocationHasher(), LocationEquator()));
+  terrain.tiles!.add(
+    Location(0, 0, 0),
+    TerrainTile(
+      Location(0, 0, 0),
+      6,
+      List<str>()));
+
+  terrain_controller = TerrainController(&!domino, terrain);
+  instance =
+    EditorInstance(
+      domino,
+      terrain_controller,
+      HashSet<Location, LocationHasher, LocationEquator>(
+        LocationHasher(), LocationEquator()));
+
+  ret Ok<EditorInstance, str>(instance);
+}

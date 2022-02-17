@@ -1,6 +1,6 @@
 
 interface IEventHandler {
-  fn handle(virtual self &!IEventHandler);
+  func handle(virtual self &!IEventHandler);
 }
 
 interface IEvent { }
@@ -9,20 +9,20 @@ struct Event {
   id int;
 }
 
-fn trigger(self &!Event) {
+func trigger(self &!Event) {
   self.handler!.handle();
 }
 
 struct GameToDominoConnection {
-  commands List<IDominoCommand>;
-  next_id! int;
+  commands! List<IDominoCommand>;
+  next_id! i64;
   events HashMap<int, Event, IntHasher, IntEquator>;
 }
 
-fn GameToDominoConnection() GameToDominoConnection {
+func GameToDominoConnection() GameToDominoConnection {
   GameToDominoConnection(
     List<IDominoCommand>(),
-    1,
+    1i64,
     HashMap<int, Event, IntHasher, IntEquator>(
       IntHasher(), IntEquator()))
 }
@@ -60,21 +60,21 @@ fn GameToDominoConnection() GameToDominoConnection {
 //       }
 //     }
 
-fn create_tile(self &!GameToDominoConnection, initialTile InitialTile) int {
+func create_tile(self &!GameToDominoConnection, initialTile InitialTile) i64 {
   id = self.next_id;
-  set self.next_id = self.next_id + 1;
+  set self.next_id = self.next_id + 1i64;
   self.commands!.add(CreateTileCommand(id, initialTile));
   ret id;
 }
 
-// fn create_unit(initialUnit InitialUnit) {
+// func create_unit(initialUnit InitialUnit) {
 //   id = nextId;
 //   set nextId = nextId + 1;
 //   domino.commands!.add(CreateUnitCommand(id, initialUnit));
 //   ret id;
 // }
 
-fn setup_game(
+func SetupGame(
   self &!GameToDominoConnection,
   cameraPosition Vec3i,
   lookatOffsetToCamera Vec3i,
@@ -204,9 +204,9 @@ fn setup_game(
 //     public void SetCliffColor(ulong tileViewId, Vec4iAnimation sideColor) {
 //       commands.Add(new SetCliffColorCommand(tileViewId, sideColor));
 //     }
-//     public void SetSurfaceColor(ulong tileViewId, Vec4iAnimation frontColor) {
-//       commands.Add(new SetSurfaceColorCommand(tileViewId, frontColor));
-//     }
+func SetSurfaceColor(self &!GameToDominoConnection, tileViewId i64, frontColor Vec4iAnimation) {
+  self.commands!.add(SetSurfaceColorCommand(tileViewId, frontColor));
+}
 //     public void SetElevation(ulong tileViewId, int elevation) {
 //       commands.Add(new SetElevationCommand(tileViewId, elevation));
 //     }
@@ -227,10 +227,10 @@ fn setup_game(
 //       commands.Add(new DestroyUnitCommand(unitViewId));
 //     }
 
-//     public List<IDominoCommand> TakeCommands() {
-//       var copy = new List<IDominoCommand>(commands);
-//       commands.Clear();
-//       return copy;
-//     }
-//   }
-// }
+
+func TakeCommands(self &!GameToDominoConnection) Array<mut, JsonNode> {
+  old_commands = set self.commands = List<IDominoCommand>();
+  ret Array<mut, JsonNode>(
+    old_commands.len(),
+    &!{ old_commands.get(_).JsonNode() });
+}

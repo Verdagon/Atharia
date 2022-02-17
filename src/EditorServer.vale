@@ -6,120 +6,164 @@ import atharia.model.*;
 import atharia.model.animation.*;
 import atharia.network.*;
 
+struct EditorServer {
+  instance! Opt<EditorInstance>;
+}
+impl IRequestHandler for EditorServer;
 
-struct Response {
-  builder StringBuilder;
+struct EditorInstance {
+  domino GameToDominoConnection;
+  terrainController TerrainController;
+  selectedLocations! HashSet<Location, LocationHasher, LocationEquator>;
 }
 
-fn jsonToNode(s StrSlice) Result<JsonNode, str> {
-  iter = ParseIter(s, false);
-  node_result = parseJson(&!iter);
-  if (node_result.is_err()) {
-    ret node_result;
-  }
-  if (iter.rest != "".slice()) {
-    ret Err<JsonNode, str>("Still text at end of input: " + iter.rest);
-  }
-  ret node_result;
+func makeKeyCodeToMemberMap() {
+  map = HashMap<str, str, StrHasher, StrEquator>();
+  map.add("b", "fire");
+  map.add("g", "grass");
+  map.add("m", "mud");
+  map.add("d", "dirt");
+  map.add("r", "rocks");
+  map.add("o", "obsidian");
+  map.add("s", "darkRocks");
+  map.add("x", "marker");
+  map.add("c", "cave");
+  map.add("f", "floor");
+  map.add("t", "tree");
+  map.add("l", "magma");
+  map.add("h", "healthPotion");
+  map.add("p", "manaPotion");
+  map.add("w", "caveWall");
+  map.add("z", "obsidianFloor");
+  map.add("v", "avelisk");
+  map.add("y", "zeddy");
+  map.add("#", "wall");
+  map.add("`", "water");
+  ret map;
 }
 
-struct StartRequest {
-  screen_gw int;
-  screen_gh int;
-}
-
-fn handleStartRequest(domino &!GameToDominoConnection, start_request &StartRequest) Result<[], str> {
-  pattern = make_pentagon_9_pattern();
-
-  cameraLookAtPosition =
-      pattern.getTileCenter(Location(0, 0, 0)).Vec3i(0); //terrain.GetTileCenter(startLocation);
-  lookatOffsetToCamera = Vec3i(0, 5000, -10000);
-
-  domino!.setup_game(
-      cameraLookAtPosition,
-      lookatOffsetToCamera,
-      200,
-      pattern);
-
-  initialTileDescription =
-      InitialTile(
-          Location(0, 0, 0),
-          6,
-          ConstantVec4iAnimationRed(), //CalculateTintedFrontColor(membersFrontColors[membersFrontColors.Count - 1].Item2, selected, highlighted),
-          ConstantVec4iAnimationBlue()); //membersSideColors[membersSideColors.Count - 1].Item2,
-          //CalculateMaybeOverlay(membersOverlays),
-          //CalculateMaybeFeature(membersFeatures),
-          //membersItems);
-  tileViewId = domino!.create_tile(initialTileDescription);
-
-  ret Ok<[], str>([]);
-}
-
-fn handleEvent(domino &!GameToDominoConnection, node &JsonObject) Result<[], str> {
+func HandleEvent(
+  server &!EditorServer,
+  node &JsonObject)
+Result<JsonNode, str> {
   maybe_event_type_str = expect_obj_member_str(node, "event_type");
-  if (maybe_event_type_str.is_err()) {
-    ret Err<[], str>(maybe_event_type_str.expect_err());
+  if maybe_event_type_str.is_err() {
+    ret Err<JsonNode, str>(maybe_event_type_str.expect_err());
   }
   event_type_str = maybe_event_type_str.expect();
 
-  if (event_type_str == "Start") {
-    maybe_screen_gw = expect_obj_member_int(node, "screen_grid_width");
-    if (maybe_screen_gw.is_err()) {
-      ret Err<[], str>(maybe_screen_gw.expect_err());
+  if event_type_str == "Start" {
+    maybe_request = ParseStartRequest(&node);
+    if maybe_request.is_err() {
+      ret Err<JsonNode, str>(maybe_request.expect_err());
     }
-    screen_gw = maybe_screen_gw.expect();
+    request = (maybe_request).expect();
 
-    maybe_screen_gh = expect_obj_member_int(node, "screen_grid_height");
-    if (maybe_screen_gh.is_err()) {
-      ret Err<[], str>(maybe_screen_gh.expect_err());
+    maybe_instance = HandleStartRequest(&request);
+    if maybe_instance.is_err() {
+      ret Err<JsonNode, str>(maybe_instance.expect_err());
     }
-    screen_gh = maybe_screen_gh.expect();
+    instance = (maybe_instance).expect();
+    
+    set server.instance = Some(instance);
+  } else if event_type_str == "SetHoveredLocation" {
+    maybe_request = ParseSetHoveredLocationRequest(&node);
+    if maybe_request.is_err() {
+      ret Err<JsonNode, str>(maybe_request.expect_err());
+    }
+    request = (maybe_request).expect();
 
-    request = StartRequest(screen_gw, screen_gh);
-    ret handleStartRequest(domino, &request);
+    maybe_result = HandleSetHoveredLocationRequest(&!server.instance!.get(), &request);
+    if maybe_result.is_err() {
+      ret Err<JsonNode, str>((maybe_result).expect_err());
+    }
+  } else if event_type_str == "LocationMouseDown" {
+    maybe_request = ParseLocationMouseDownRequest(&node);
+    if maybe_request.is_err() {
+      ret Err<JsonNode, str>(maybe_request.expect_err());
+    }
+    request = (maybe_request).expect();
+
+    maybe_result = HandleLocationMouseDownRequest(&!server.instance!.get(), &request);
+    if maybe_result.is_err() {
+      ret Err<JsonNode, str>((maybe_result).expect_err());
+    }
   } else {
-    ret Err<[], str>("Unknown request type: " + event_type_str);
+    ret Err<JsonNode, str>("Unknown request type: " + event_type_str);
   }
+
+  commands_json_arr =
+    JsonArray(
+      if not server.instance.isEmpty() {
+        server.instance!.get().domino!.TakeCommands()
+      } else {
+        Array<mut, JsonNode>(0)
+      });
+  response_obj = JsonObject();
+  response_obj.fields!.add("commands", commands_json_arr);
+  ret Ok<JsonNode, str>(response_obj);
 }
 
-struct MyRequestHandler {
-  counter! int;
-}
-impl IRequestHandler for MyRequestHandler;
-fn handle(self &!MyRequestHandler impl IRequestHandler, request_path str, request_json str) str {
+func handle(self &!EditorServer impl IRequestHandler, request_path str, request_json str) str {
   maybe_request_root_node = jsonToNode(request_json.slice());
-  if (maybe_request_root_node.is_err()) {
+  if maybe_request_root_node.is_err() {
     ret "Couldn't parse request: " + maybe_request_root_node.expect_err();
   }
   request_root_node = (maybe_request_root_node).expect();
 
   maybe_request_root_obj = request_root_node.as<JsonObject>();
-  if (maybe_request_root_obj.is_err()) {
+  if maybe_request_root_obj.is_err() {
     ret "Request wasn't json object!";
   }
   request_root_obj = maybe_request_root_obj.expect();
 
-  domino = GameToDominoConnection();
-  result = handleEvent(&!domino, &request_root_obj);
-  if (result.is_err()) {
-    ret "Error: " + result.expect_err();
+  response_obj_result = HandleEvent(self, &request_root_obj);
+  if response_obj_result.is_err() {
+    ret "Error: " + response_obj_result.expect_err();
   }
-
-  commands_json_arr =
-      JsonArray(
-        [vary *](
-            domino.commands.len(),
-            &!{ domino.commands.get(_).JsonNode() }));
-  response_obj = JsonObject();
-  response_obj.fields!.add("commands", commands_json_arr);
-
-  drop(domino);
-
-  set self.counter = self.counter + 1;
+  response_obj = (response_obj_result).expect();
 
   ret "Response: " + response_obj.str();
 }
 
-fn main() export {
-  runServer(&MyRequestHandler(0));
+func SetSelection(
+    server &!EditorInstance,
+    locations HashSet<Location, LocationHasher, LocationEquator>) {
+  set server.selectedLocations =
+      HashSet<Location, LocationHasher, LocationEquator>(
+         LocationHasher(), LocationEquator(), &locations);
+
+  server.terrainController!.SetHighlightedLocations(locations);
+
+  //SortedSet<string> commonMembers = null;
+  //foreach (var loc in selectedLocations) {
+  //  if (commonMembers == null) {
+  //    commonMembers = new SortedSet<string>();
+  //    foreach (var member in terrainController.terrain.tiles[loc].members) {
+  //      commonMembers.Add(member);
+  //    }
+  //  } else {
+  //    var members = new SortedSet<string>();
+  //    foreach (var member in terrainController.terrain.tiles[loc].members) {
+  //      members.Add(member);
+  //    }
+  //    foreach (var member in new SortedSet<string>(commonMembers)) {
+  //      if (!members.Contains(member)) {
+  //        commonMembers.Remove(member);
+  //      }
+  //    }
+  //  }
+  //}
+
+  //var entries = new List<ListView.Entry>();
+  //if (commonMembers != null) {
+  //  foreach (var member in commonMembers) {
+  //    entries.Add(new ListView.Entry(new SymbolId("AthSymbols", 0x0072), member));
+  //  }
+  //}
+  //membersView.ShowEntries(entries);
+}
+
+exported func main() {
+  runServer(&EditorServer(None<EditorInstance>()));
 }

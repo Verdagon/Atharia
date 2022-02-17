@@ -4,7 +4,7 @@
 //  fadeInEndTimeMs i64;
 
 //}
-//fn FadeIn(i64 fadeInStartTimeMs, i64 fadeInEndTimeMs) FadeIn {
+//func FadeIn(i64 fadeInStartTimeMs, i64 fadeInEndTimeMs) FadeIn {
 //  this.fadeInStartTimeMs = fadeInStartTimeMs;
 //  this.fadeInEndTimeMs = fadeInEndTimeMs;
 
@@ -26,7 +26,7 @@
 //  vassert(fadeOutEndTimeMs <= 0);
 //}
 
-interface IDominoCommand {
+sealed interface IDominoCommand {
 }
 
 impl IDominoCommand for SetupGameCommand;
@@ -39,7 +39,7 @@ struct SetupGameCommand {
 
 impl IDominoCommand for CreateTileCommand;
 struct CreateTileCommand {
-  newTileId int; //u64;
+  newTileId i64;
   initialTile InitialTile;
 }
 
@@ -164,11 +164,11 @@ struct CreateTileCommand {
 //  tileViewId u64;
 //  sideColor Vec4iAnimation;
 //}
-//impl IDominoCommand for SetSurfaceColorCommand;
-//struct SetSurfaceColorCommand {
-//  tileViewId u64;
-//  frontColor Vec4iAnimation;
-//}
+impl IDominoCommand for SetSurfaceColorCommand;
+struct SetSurfaceColorCommand {
+  tileViewId i64;
+  frontColor Vec4iAnimation;
+}
 //impl IDominoCommand for SetElevationCommand;
 //struct SetElevationCommand {
 //  tileViewId u64;
