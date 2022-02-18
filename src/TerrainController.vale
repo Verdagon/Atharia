@@ -147,6 +147,8 @@ func AddTerrainTile(self &!TerrainController, location Location, tile &!TerrainT
       tile,
       location);
   self.tilePresenters!.add(location, presenter);
+
+  self!.RefreshPhantomTiles();
 }
 
 func addPhantomTile(self &!TerrainController, location Location) {

@@ -231,11 +231,15 @@ HashSet<Location, LocationHasher, LocationEquator> {
   foreach originalLocation in sourceLocs {
     adjacents = pattern.GetAdjacentLocations(originalLocation, considerCornersAdjacent);
     if includeSourceLocs {
-      adjacents!.add(originalLocation);
+      if not adjacents.contains(originalLocation) {
+        adjacents!.add(originalLocation);
+      }
     }
     foreach adjacentLocation in adjacents {
       if includeSourceLocs or not sourceLocs.contains(adjacentLocation) {
-        result!.add(adjacentLocation);
+        if not result.contains(adjacentLocation) {
+          result!.add(adjacentLocation);
+        }
       }
     }
   }

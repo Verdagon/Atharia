@@ -14,7 +14,7 @@ Result<(), str> {
   location = request.location;
 
 
-  if server.terrainController.tilePresenters.has(location) {
+  if server.terrainController.tilePresenters.ContainsKey(location) {
     // Add or remove from selection
 
     newSelection =
@@ -26,7 +26,7 @@ Result<(), str> {
       newSelection!.add(location);
     }
     server!.SetSelection(newSelection);
-  } else if server.terrainController.phantomTilePresenters.has(location) {
+  } else if server.terrainController.phantomTilePresenters.ContainsKey(location) {
     phantomTilePresenter =
         server.terrainController.phantomTilePresenters!.remove(location);
     drop(phantomTilePresenter);
