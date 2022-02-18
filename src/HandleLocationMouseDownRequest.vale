@@ -13,15 +13,41 @@ Result<(), str> {
   println("In HandleLocationMouseDownRequest");
   location = request.location;
 
-  newSelection =
-    HashSet<Location, LocationHasher, LocationEquator>(
-      LocationHasher(), LocationEquator(), &server.selectedLocations);
-  if newSelection.contains(location) {
-    newSelection!.remove(location);
-  } else {
+
+  if server.terrainController.tilePresenters.has(location) {
+    // Add or remove from selection
+
+    newSelection =
+        server.selectedLocations.HashSet<Location, LocationHasher, LocationEquator>(
+            LocationHasher(), LocationEquator());
+    if newSelection.contains(location) {
+      newSelection!.remove(location);
+    } else {
+      newSelection!.add(location);
+    }
+    server!.SetSelection(newSelection);
+  } else if server.terrainController.phantomTilePresenters.has(location) {
+    phantomTilePresenter =
+        server.terrainController.phantomTilePresenters!.remove(location);
+    drop(phantomTilePresenter);
+
+    terrainTile = TerrainTile(location, 1, List<str>());
+    borrow = &!terrainTile;
+    server.terrainController.terrain.tiles!.add(location, terrainTile);
+    server.terrainController!.AddTerrainTile(location, borrow);
+    //Save();
+
+    newSelection =
+        server.selectedLocations.HashSet<Location, LocationHasher, LocationEquator>(
+            LocationHasher(), LocationEquator());
     newSelection!.add(location);
+    server!.SetSelection(newSelection);
+  } else {
+
   }
-  server!.SetSelection(newSelection);
+
+
+
 
   ret Ok<(), str>(());
 }

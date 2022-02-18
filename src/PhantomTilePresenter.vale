@@ -1,0 +1,168 @@
+
+#!DeriveStructDrop
+struct PhantomTilePresenter {
+//     //public delegate void OnMouseInEvent();
+//     //public delegate void OnMouseOutEvent();
+//     public delegate void OnPhantomTileClickedEvent();
+// 
+//     // IClock clock;
+//     // ITimer timer;
+  pattern &Pattern;
+  location Location;
+//     // ILoader loader;
+//     // private TileShapeMeshCache tileShapeMeshCache;
+// 
+  elevationStepHeight int;
+//     
+//     Vec3 tileCenter;
+  tileViewId! i64;
+  highlighted bool;
+  domino &!GameToDominoConnection;
+}
+
+func PhantomTilePresenter(
+  domino &!GameToDominoConnection,
+  pattern &Pattern,
+  location Location,
+  elevationStepHeight int)
+PhantomTilePresenter {
+  //this.domino = domino;
+  // this.clock = clock;
+  // this.timer = timer;
+  //this.pattern = pattern;
+  //this.location = location;
+  // this.loader = loader;
+  // this.tileShapeMeshCache = tileShapeMeshCache;
+  // this.elevationStepHeight = elevationStepHeight;
+
+  //positionVec2 = pattern.GetTileCenter(location);
+
+  //tileCenter = Vec3(positionVec2.x, positionVec2.y, 0);
+
+  highlighted = false;
+  tileViewId = CreateTileView(domino, pattern, location, elevationStepHeight, highlighted);
+
+  self =
+      PhantomTilePresenter(pattern, location, elevationStepHeight, tileViewId, false, domino);
+
+  self!.ResetViews();
+
+  ret self;
+}
+
+func drop(self PhantomTilePresenter) {
+  [pattern, _, elevationStepHeight, tileViewId, _, domino] = self;
+  domino!.DestroyTile(tileViewId);
+}
+
+func GetColors(highlighted bool) (Vec4iAnimation, Vec4iAnimation) {
+  frontColor = if highlighted { Vec4i(51, 51, 51, 255) } else { Vec4i(0, 0, 0, 255) };
+  sideColor = if highlighted { Vec4i(51, 51, 51, 255) } else { Vec4i(0, 0, 0, 255) };
+  a Vec4iAnimation = ConstantVec4iAnimation(frontColor);
+  b Vec4iAnimation = ConstantVec4iAnimation(sideColor);
+  ret (a, b);
+}
+
+func SetHighlighted(
+  self &!PhantomTilePresenter,
+  highlighted bool)
+{
+  [frontColor, sideColor] = GetColors(highlighted);
+  self.domino!.SetSurfaceColor(self.tileViewId, frontColor);
+  //self.domino!.SetCliffColor(self.tileViewId, sideColor);
+  // tileView.SetDescription(GetTileDescription(pattern, location, highlighted));
+}
+
+func CreateTileView(
+  domino &!GameToDominoConnection,
+  pattern &Pattern,
+  location Location,
+  elevationStepHeight int,
+  highlighted bool)
+i64 {
+  patternTileIndex = location.index_in_group;
+  shapeIndex = pattern.pattern_tiles.get(patternTileIndex).shape_index;
+  tileDescription = GetTileDescription(pattern, location, elevationStepHeight, highlighted);
+  ret domino!.create_tile(tileDescription);
+}
+
+func ResetViews(self &!PhantomTilePresenter) {
+    self.domino!.DestroyTile(self.tileViewId);
+    // tileView.DestroyTile();
+
+  // position = CalculatePosition(elevationStepHeight, pattern, location);
+
+  set self.tileViewId =
+      CreateTileView(
+          self.domino, self.pattern, self.location, self.elevationStepHeight, self.highlighted);
+  
+  // var (groundMesh, outlinesMesh) = tileShapeMeshCache.Get(shapeIndex, unityElevationStepHeight, .025f);
+  // tileView = TileView.Create(loader, groundMesh, outlinesMesh, clock, timer, tileDescription);
+  // tileView.gameObject.AddComponent<PhantomTilePresenterTile>().Init(this);
+  // tileView.gameObject.transform.localPosition = position;
+}
+
+// func CalculatePosition(elevationStepHeight int, pattern Pattern, location Location) Vec3 {
+//   positionVec2 = pattern.GetTileCenter(location);
+//   ret Vec3(positionVec2.x, positionVec2.y, elevationStepHeight);
+// }
+
+
+//     // private static SymbolId GetTerrainTileShapeSymbol(Pattern pattern, PatternTile patternTile) {
+//     //   switch (pattern.name) {
+//     //     case "square":
+//     //       if patternTile.shapeIndex == 0 {
+//     //         return SymbolId("AthSymbols", 0x006A);
+//     //       }
+//     //       break;
+//     //     case "pentagon9":
+//     //       if patternTile.shapeIndex == 0 {
+//     //         return SymbolId("AthSymbols", 0x0069);
+//     //       } else if patternTile.shapeIndex == 1 {
+//     //         return SymbolId("AthSymbols", 0x0068);
+//     //       }
+//     //       break;
+//     //     case "hex":
+//     //       if patternTile.shapeIndex == 0 {
+//     //         return SymbolId("AthSymbols", 0x0035);
+//     //       }
+//     //       break;
+//     //   }
+//     //   return SymbolId("AthSymbols", 0x0065);
+//     // }
+//     //
+func GetTileDescription(
+  pattern &Pattern,
+  location Location,
+  elevationStepHeight int,
+  highlighted bool)
+InitialTile {
+  patternTile = pattern.pattern_tiles.get(location.index_in_group);
+
+  [frontColor, sideColor] = GetColors(highlighted);
+
+  ret InitialTile(
+      location,
+      1,
+      frontColor,
+      sideColor);
+}
+
+//     // public void OnStrMutListEffect(IStrMutListEffect effect) {
+//     //   effect.visitIStrMutListEffect(this);
+//     // }
+//     //
+//     // public void visitStrMutListCreateEffect(StrMutListCreateEffect effect) { }
+//     //
+//     // public void visitStrMutListDeleteEffect(StrMutListDeleteEffect effect) { }
+//     //
+//     // public void visitStrMutListAddEffect(StrMutListAddEffect effect) {
+//     //   ResetViews();
+//     // }
+//     //
+//     // public void visitStrMutListRemoveEffect(StrMutListRemoveEffect effect) {
+//     //   ResetViews();
+//     // }
+//   }
+// }
+// 

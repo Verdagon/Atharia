@@ -55,18 +55,18 @@ func +(s str, loc Location) str {
 //   private readonly int hashCode;
 //          public readonly int groupX;
 //   public readonly int groupY;
-//   public readonly int indexInGroup;
+//   public readonly int index_in_group;
 //   public Location(
 //       int groupX,
 //       int groupY,
-//       int indexInGroup) {
+//       int index_in_group) {
 //     this.groupX = groupX;
 //     this.groupY = groupY;
-//     this.indexInGroup = indexInGroup;
+//     this.index_in_group = index_in_group;
 //     int hash = 0;
 //     hash = hash * 37 + groupX;
 //     hash = hash * 37 + groupY;
-//     hash = hash * 37 + indexInGroup;
+//     hash = hash * 37 + index_in_group;
 //     this.hashCode = hash;
 
 //   }
@@ -91,7 +91,7 @@ func +(s str, loc Location) str {
 //     return true
 //                && groupX.Equals(that.groupX)
 //         && groupY.Equals(that.groupY)
-//         && indexInGroup.Equals(that.indexInGroup)
+//         && index_in_group.Equals(that.index_in_group)
 //         ;
 //   }
 //   public override int GetHashCode() {
@@ -105,8 +105,8 @@ func +(s str, loc Location) str {
 //     if (groupY != that.groupY) {
 //       return groupY.CompareTo(that.groupY);
 //     }
-//     if (indexInGroup != that.indexInGroup) {
-//       return indexInGroup.CompareTo(that.indexInGroup);
+//     if (index_in_group != that.index_in_group) {
+//       return index_in_group.CompareTo(that.index_in_group);
 //     }
 //     return 0;
 //   }
@@ -115,7 +115,7 @@ func +(s str, loc Location) str {
 //     return "Location(" +
 //         groupX + ", " +
 //         groupY + ", " +
-//         indexInGroup
+//         index_in_group
 //         + ")";
 
 //     }
@@ -126,9 +126,9 @@ func +(s str, loc Location) str {
 //       source.Expect(",");
 //       var groupY = source.ParseInt();
 //       source.Expect(",");
-//       var indexInGroup = source.ParseInt();
+//       var index_in_group = source.ParseInt();
 //       source.Expect(")");
-//       return new Location(groupX, groupY, indexInGroup);
+//       return new Location(groupX, groupY, index_in_group);
 //   }
 // }
        

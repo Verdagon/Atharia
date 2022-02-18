@@ -219,9 +219,9 @@ func SetSurfaceColor(self &!GameToDominoConnection, tileViewId i64, frontColor V
 //     public void AddItem(ulong tileViewId, ulong itemId, InitialSymbol symbolDescription) {
 //       commands.Add(new AddItemCommand(tileViewId, itemId, symbolDescription));
 //     }
-//     public void DestroyTile(ulong tileViewId) {
-//       commands.Add(new DestroyTileCommand(tileViewId));
-//     }
+func DestroyTile(self &!GameToDominoConnection, tileViewId i64) {
+  self.commands!.add(DestroyTileCommand(tileViewId));
+}
 
 //     public void DestroyUnit(ulong unitViewId) {
 //       commands.Add(new DestroyUnitCommand(unitViewId));

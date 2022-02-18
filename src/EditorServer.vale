@@ -130,8 +130,8 @@ func SetSelection(
     server &!EditorInstance,
     locations HashSet<Location, LocationHasher, LocationEquator>) {
   set server.selectedLocations =
-      HashSet<Location, LocationHasher, LocationEquator>(
-         LocationHasher(), LocationEquator(), &locations);
+      locations.HashSet<Location, LocationHasher, LocationEquator>(
+          LocationHasher(), LocationEquator());
 
   server.terrainController!.SetSelectedLocations(locations);
 

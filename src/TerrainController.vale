@@ -16,10 +16,10 @@ struct TerrainController {
 
   domino &!GameToDominoConnection;
   terrain Terrain;
-// 
+
   tilePresenters HashMap<Location, TerrainTilePresenter, LocationHasher, LocationEquator>;
-//   Dictionary<Location, PhantomTilePresenter> phantomTilePresenters = new Dictionary<Location, PhantomTilePresenter>();
-// 
+  phantomTilePresenters HashMap<Location, PhantomTilePresenter, LocationHasher, LocationEquator>;
+
   maybeMouseHighlightedLocation! Opt<Location>;
   selectedLocations! HashSet<Location, LocationHasher, LocationEquator>;
 }
@@ -34,41 +34,33 @@ TerrainController {
   // this.vivimap = vivimap;
   //this.terrain = terrain;
 
-  println("TerrainController A");
-
   self =
     TerrainController(
       domino,
       terrain,
       HashMap<Location, TerrainTilePresenter, LocationHasher, LocationEquator>(
         LocationHasher(), LocationEquator()),
+      HashMap<Location, PhantomTilePresenter, LocationHasher, LocationEquator>(
+        LocationHasher(), LocationEquator()),
       None<Location>(),
       HashSet<Location, LocationHasher, LocationEquator>(
         LocationHasher(), LocationEquator()));
-
-  println("TerrainController B");
 
   foreach [location Location, tile &!TerrainTile] in &!self.terrain.tiles {
     self!.AddTerrainTile(location, &!tile);
   }
 
-  println("TerrainController C");
-
-  // RefreshPhantomTiles();
+  self!.RefreshPhantomTiles();
 
   ret self;
 }
-// 
-//   public void AddTile(TerrainTilePresenter presenter) {
-//     tilePresenters.Add(presenter.location, presenter);
-//   }
-// 
+
 //   public Location GetMaybeMouseHighlightLocation() {
 //     return maybeMouseHighlightedLocation;
 //   }
 // 
 //   public void DestroyTerrainController() {
-//     foreach (var entry in tilePresenters) {
+//     foreach entry in tilePresenters {
 //       entry.Value.DestroyTerrainTilePresenter();
 //     }
 //   }
@@ -83,7 +75,7 @@ func UpdateLocationHighlighted(self &!TerrainController, location Location) {
     newMousedTerrainTilePresenter!.SetSelected(selected);
   }
 
-  maybeNewMousedPhantomTilePresenter = self.tilePresenters!.get(location);
+  maybeNewMousedPhantomTilePresenter = self.phantomTilePresenters!.get(location);
   if not maybeNewMousedPhantomTilePresenter.isEmpty() {
     newMousedPhantomTilePresenter = &!maybeNewMousedPhantomTilePresenter!.get();
     newMousedPhantomTilePresenter!.SetHighlighted(highlighted);
@@ -103,7 +95,7 @@ func UpdateLocationHighlighted(self &!TerrainController, location Location) {
 // 
 //   public void RemoveTile(TerrainTile tile) {
 //     tilePresenters.Remove(tile.location);
-//     var newHighlightedLocations = new SortedSet<Location>(selectedLocations);
+//     newHighlightedLocations = new SortedSet<Location>(selectedLocations);
 //     newHighlightedLocations.Remove(tile.location);
 //     SetHighlightedLocations(newHighlightedLocations);
 //     RefreshPhantomTiles();
@@ -116,31 +108,36 @@ func UpdateLocationHighlighted(self &!TerrainController, location Location) {
 //     return null;
 //   }
 // 
-//   private void RefreshPhantomTiles() {
-//     var phantomTileLocations =
-//         terrain.pattern.GetAdjacentLocations(new SortedSet<Location>(terrain.tiles.Keys), false, true);
-//     var previousPhantomTileLocations = phantomTilePresenters.Keys;
-// 
-//     var addedPhantomTileLocations = new SortedSet<Location>(phantomTileLocations);
-//     SetUtils.RemoveAll(addedPhantomTileLocations, previousPhantomTileLocations);
-// 
-//     var removedPhantomTileLocations = new SortedSet<Location>(previousPhantomTileLocations);
-//     SetUtils.RemoveAll(removedPhantomTileLocations, phantomTileLocations);
-// 
-//     foreach (var removedPhantomTileLocation in removedPhantomTileLocations) {
-//       removePhantomTile(removedPhantomTileLocation);
-//     }
-// 
-//     foreach (var addedPhantomTileLocation in addedPhantomTileLocations) {
-//       addPhantomTile(addedPhantomTileLocation);
-//     }
-//   }
-// 
-//   private void removePhantomTile(Location removedPhantomTileLocation) {
-//     phantomTilePresenters[removedPhantomTileLocation].DestroyPhantomTilePresenter();
-//     phantomTilePresenters.Remove(removedPhantomTileLocation);
-//   }
-// 
+func RefreshPhantomTiles(self &!TerrainController) {
+  phantomTileLocations =
+      self.terrain.pattern.GetAdjacentLocations(
+          &self.terrain.tiles.KeysIter().HashSet(LocationHasher(), LocationEquator()),
+          false,
+          true);
+  previousPhantomTileLocations =
+      self.phantomTilePresenters.KeysIter().HashSet(LocationHasher(), LocationEquator());
+
+  addedPhantomTileLocations =
+      phantomTileLocations.diff_iter(&previousPhantomTileLocations)
+          .HashSet(LocationHasher(), LocationEquator());
+
+  removedPhantomTileLocations = 
+      previousPhantomTileLocations.diff_iter(&phantomTileLocations)
+          .HashSet(LocationHasher(), LocationEquator());
+  
+  foreach removedPhantomTileLocation in removedPhantomTileLocations {
+    self!.removePhantomTile(removedPhantomTileLocation);
+  }
+
+  foreach addedPhantomTileLocation in addedPhantomTileLocations {
+    self!.addPhantomTile(addedPhantomTileLocation);
+  }
+}
+
+func removePhantomTile(self &!TerrainController, removedPhantomTileLocation Location) {
+  self.phantomTilePresenters!.remove(removedPhantomTileLocation);
+}
+
 func AddTerrainTile(self &!TerrainController, location Location, tile &!TerrainTile) {
   presenter =
     TerrainTilePresenter(
@@ -151,12 +148,14 @@ func AddTerrainTile(self &!TerrainController, location Location, tile &!TerrainT
       location);
   self.tilePresenters!.add(location, presenter);
 }
-// 
-//   private void addPhantomTile(Location location) {
-//     var presenter = new PhantomTilePresenter(domino, terrain.pattern, location, terrain.elevationStepHeight);
-//     phantomTilePresenters.Add(location, presenter);
-//   }
-// 
+
+func addPhantomTile(self &!TerrainController, location Location) {
+  presenter =
+      PhantomTilePresenter(
+          self.domino, &self.terrain.pattern, location, self.terrain.elevationStepHeight);
+  self.phantomTilePresenters!.add(location, presenter);
+}
+
 func SetSelectedLocations(
     self &!TerrainController,
     locations HashSet<Location, LocationHasher, LocationEquator>) {

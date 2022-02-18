@@ -204,10 +204,11 @@ struct SetSurfaceColorCommand {
 //  detailId u64;
 //}
 
-//impl IDominoCommand for DestroyTileCommand;
-//struct DestroyTileCommand {
-//  tileViewId u64;
-//}
+struct DestroyTileCommand {
+  tileViewId i64;
+}
+impl IDominoCommand for DestroyTileCommand;
+
 //impl IDominoCommand for DestroyUnitCommand;
 //struct DestroyUnitCommand {
 //  unitId u64;

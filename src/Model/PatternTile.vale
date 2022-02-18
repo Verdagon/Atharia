@@ -34,24 +34,24 @@ struct PatternTile {
 //   public readonly int rotateRadianards; // radianard means radians times 1000
 //   public readonly Vec2 translate;
 //   public readonly PatternSideAdjacencyImmList sideIndexToSideAdjacencies;
-//   public readonly PatternCornerAdjacencyImmListImmList cornerIndexToCornerAdjacencies;
+//   public readonly PatternCornerAdjacencyImmListImmList corner_index_to_corner_adjacencies;
 //   public PatternTile(
 //       int shapeIndex,
 //       int rotateRadianards,
 //       Vec2 translate,
 //       PatternSideAdjacencyImmList sideIndexToSideAdjacencies,
-//       PatternCornerAdjacencyImmListImmList cornerIndexToCornerAdjacencies) {
+//       PatternCornerAdjacencyImmListImmList corner_index_to_corner_adjacencies) {
 //     this.shapeIndex = shapeIndex;
 //     this.rotateRadianards = rotateRadianards;
 //     this.translate = translate;
 //     this.sideIndexToSideAdjacencies = sideIndexToSideAdjacencies;
-//     this.cornerIndexToCornerAdjacencies = cornerIndexToCornerAdjacencies;
+//     this.corner_index_to_corner_adjacencies = corner_index_to_corner_adjacencies;
 //     int hash = 0;
 //     hash = hash * 37 + shapeIndex;
 //     hash = hash * 37 + rotateRadianards;
 //     hash = hash * 37 + translate.GetDeterministicHashCode();
 //     hash = hash * 37 + sideIndexToSideAdjacencies.GetDeterministicHashCode();
-//     hash = hash * 37 + cornerIndexToCornerAdjacencies.GetDeterministicHashCode();
+//     hash = hash * 37 + corner_index_to_corner_adjacencies.GetDeterministicHashCode();
 //     this.hashCode = hash;
 
 //   }
@@ -78,7 +78,7 @@ struct PatternTile {
 //         && rotateRadianards.Equals(that.rotateRadianards)
 //         && translate.Equals(that.translate)
 //         && sideIndexToSideAdjacencies.Equals(that.sideIndexToSideAdjacencies)
-//         && cornerIndexToCornerAdjacencies.Equals(that.cornerIndexToCornerAdjacencies)
+//         && corner_index_to_corner_adjacencies.Equals(that.corner_index_to_corner_adjacencies)
 //         ;
 //   }
 //   public override int GetHashCode() {
@@ -98,8 +98,8 @@ struct PatternTile {
 //     if (sideIndexToSideAdjacencies != that.sideIndexToSideAdjacencies) {
 //       return sideIndexToSideAdjacencies.CompareTo(that.sideIndexToSideAdjacencies);
 //     }
-//     if (cornerIndexToCornerAdjacencies != that.cornerIndexToCornerAdjacencies) {
-//       return cornerIndexToCornerAdjacencies.CompareTo(that.cornerIndexToCornerAdjacencies);
+//     if (corner_index_to_corner_adjacencies != that.corner_index_to_corner_adjacencies) {
+//       return corner_index_to_corner_adjacencies.CompareTo(that.corner_index_to_corner_adjacencies);
 //     }
 //     return 0;
 //   }
@@ -110,7 +110,7 @@ struct PatternTile {
 //         rotateRadianards + ", " +
 //         translate + ", " +
 //         sideIndexToSideAdjacencies + ", " +
-//         cornerIndexToCornerAdjacencies
+//         corner_index_to_corner_adjacencies
 //         + ")";
 
 //     }
@@ -125,9 +125,9 @@ struct PatternTile {
 //       source.Expect(",");
 //       var sideIndexToSideAdjacencies = PatternSideAdjacencyImmList.Parse(source);
 //       source.Expect(",");
-//       var cornerIndexToCornerAdjacencies = PatternCornerAdjacencyImmListImmList.Parse(source);
+//       var corner_index_to_corner_adjacencies = PatternCornerAdjacencyImmListImmList.Parse(source);
 //       source.Expect(")");
-//       return new PatternTile(shapeIndex, rotateRadianards, translate, sideIndexToSideAdjacencies, cornerIndexToCornerAdjacencies);
+//       return new PatternTile(shapeIndex, rotateRadianards, translate, sideIndexToSideAdjacencies, corner_index_to_corner_adjacencies);
 //   }
 // }
        

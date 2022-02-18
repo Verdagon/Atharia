@@ -100,6 +100,12 @@ func JsonNode(self &SetSurfaceColorCommand impl IDominoCommand) JsonNode {
   node.fields!.add("color", self.frontColor.JsonNode());
   ret node;
 }
+func JsonNode(self &DestroyTileCommand impl IDominoCommand) JsonNode {
+  node = JsonObject();
+  node.fields!.add("command_type", "DestroyTile".JsonNode());
+  node.fields!.add("tile_id", self.tileViewId.JsonNode());
+  ret node;
+}
 
 func JsonNode<T>(list &List<T>) JsonNode {
   ret JsonArray(
