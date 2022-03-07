@@ -338,10 +338,10 @@ func OnAddMember(self &!TerrainTilePresenter, member str) {
 //       OnRemoveMember(index);
 //     }
 // 
-//     public void SetElevation(int elevation) {
-//       terrainTile.elevation = elevation;
-//       domino.SetElevation(tileViewId, elevation);
-//     }
+func SetElevation(self &!TerrainTilePresenter, elevation int) {
+  set self.terrainTile.elevation = elevation;
+  self.domino!.SetElevation(self.tileViewId, elevation);
+}
 // 
 //     //   if (unitView) {
 //     //     unitView.Destruct();

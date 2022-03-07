@@ -106,6 +106,13 @@ func JsonNode(self &DestroyTileCommand impl IDominoCommand) JsonNode {
   node.fields!.add("tile_id", self.tileViewId.JsonNode());
   ret node;
 }
+func JsonNode(self &SetElevationCommand impl IDominoCommand) JsonNode {
+  node = JsonObject();
+  node.fields!.add("command_type", "SetElevation".JsonNode());
+  node.fields!.add("tile_id", self.tileViewId.JsonNode());
+  node.fields!.add("elevation", self.elevation.JsonNode());
+  ret node;
+}
 
 func JsonNode<T>(list &List<T>) JsonNode {
   ret JsonArray(

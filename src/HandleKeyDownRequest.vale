@@ -1,0 +1,106 @@
+
+struct KeyDownRequest {
+  unicode int;
+  leftShiftDown bool;
+  rightShiftDown bool;
+  ctrlDown bool;
+  leftAltDown bool;
+  rightAltDown bool;
+}
+
+func HandleKeyDownRequest(
+  server &!EditorInstance,
+  request &KeyDownRequest)
+Result<(), str> {
+  domino = &!server.domino;
+
+  c = request.unicode;
+  leftShiftDown = request.leftShiftDown;
+  rightShiftDown = request.rightShiftDown;
+  ctrlDown = request.ctrlDown;
+  leftAltDown = request.leftAltDown;
+  rightAltDown = request.rightAltDown;
+  
+  println("Got key down: " + c);
+
+  if c == 27 {
+    println("Got escape!");
+  } else if c == 61 { // = and + and -2
+    foreach loc in server.selectedLocations {
+      presenter = (server.terrainController.tilePresenters.get(loc)).get();
+      presenter!.SetElevation(server.terrainController.terrain.tiles.get(loc).get().elevation + 1);
+    }
+    //Save();
+    //UpdateLookPanelView();
+    //break;
+  }
+
+  ret Ok<(), str>(());
+
+  //switch (c) {
+  //  case 27:
+  //    SetSelection(new SortedSet<Location>());
+  //    break;
+  //  case '/':
+  //    var allLocations = new SortedSet<Location>();
+  //    foreach (var locationAndTile in terrainPresenter.terrain.tiles) {
+  //      allLocations.Add(locationAndTile.Key);
+  //    }
+  //    SetSelection(allLocations);
+  //    break;
+  //  case 'z':
+  //    var panelId = domino.MakePanel(-1, -1, screenGW + 2, screenGH + 2);
+  //    var rect = domino.AddRectangle(panelId, 0, 0, screenGW + 2, screenGH + 2, 0, Vec4i.black, Vec4i.black);
+  //    GameToDominoConnection.IEventHandler remove = null;
+  //    var onClick = domino.MakeEvent(() => {
+  //      Console.WriteLine("clicked!");
+  //      remove();
+  //    });
+  //    var onMouseIn = domino.MakeEvent(() => Console.WriteLine("mouse in!"));
+  //    var onMouseOut = domino.MakeEvent(() => Console.WriteLine("mouse out!"));
+  //    var button = domino.AddButton(
+  //        rect, 2, 2, 15, 4, 0, new Vec4i(153, 153, 153, 255), new Vec4i(153, 153, 153, 255), new Vec4i(102, 102, 102, 255), onClick, onMouseIn, onMouseOut);
+  //    var strIds = domino.AddString(button, 3, 3, 15, Vec4i.cyan, "Cascadia", "hello");
+  //    remove = () => {
+  //      foreach (var id in strIds) {
+  //        domino.RemoveView(id);
+  //      }
+  //      domino.RemoveView(button);
+  //      domino.DestroyEvent(onMouseOut);
+  //      domino.DestroyEvent(onMouseIn);
+  //      domino.DestroyEvent(onClick);
+  //      domino.RemoveView(rect);
+  //      domino.RemoveView(panelId);
+  //    };
+  //    break;
+  //  case '-':
+  //  case '_':
+  //  case -1:
+  //    foreach (var loc in selectedLocations) {
+  //      terrainPresenter.GetTilePresenter(loc).SetElevation(
+  //          Math.Max(1, terrainPresenter.terrain.tiles[loc].elevation - 1));
+  //    }
+  //    Save();
+  //    UpdateLookPanelView();
+  //    break;
+  //  case '\u007F':
+  //    foreach (var loc in new SortedSet<Location>(selectedLocations)) {
+  //      selectedLocations.Remove(loc);
+  //      var tile = terrainPresenter.terrain.tiles[loc];
+  //      terrainPresenter.terrain.tiles.Remove(loc);
+  //      tile.Destruct();
+  //    }
+  //    Save();
+  //    UpdateLookPanelView();
+  //    break;
+  //}
+  //foreach (var keyCodeAndMember in MemberStuff.memberByKeyCode) {
+  //  if (c == keyCodeAndMember.Key) {
+  //    bool addKeyDown = rightAltDown;
+  //    bool removeKeyDown = leftAltDown;
+  //    ChangeMember(keyCodeAndMember.Value, addKeyDown, removeKeyDown);
+  //    Save();
+  //  }
+  //  UpdateLookPanelView();
+  //}
+}

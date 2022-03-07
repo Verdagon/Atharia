@@ -107,3 +107,44 @@ func ParseLocationMouseDownRequest(node &JsonObject) Result<LocationMouseDownReq
   request = LocationMouseDownRequest(tile_id, location);
   ret Ok<LocationMouseDownRequest, str>(request);
 }
+
+func ParseKeyDownRequest(node &JsonObject) Result<KeyDownRequest, str> {
+  unicode_result = expect_obj_member_int(node, "unicode");
+  if unicode_result.is_err() {
+    ret Err<KeyDownRequest, str>(unicode_result.expect_err());
+  }
+  unicode = unicode_result.expect();
+
+  left_shift_down_result = expect_obj_member_bool(node, "left_shift_down");
+  if left_shift_down_result.is_err() {
+    ret Err<KeyDownRequest, str>(left_shift_down_result.expect_err());
+  }
+  left_shift_down = left_shift_down_result.expect();
+
+  right_shift_down_result = expect_obj_member_bool(node, "right_shift_down");
+  if right_shift_down_result.is_err() {
+    ret Err<KeyDownRequest, str>(right_shift_down_result.expect_err());
+  }
+  right_shift_down = right_shift_down_result.expect();
+
+  left_alt_down_result = expect_obj_member_bool(node, "left_alt_down");
+  if left_alt_down_result.is_err() {
+    ret Err<KeyDownRequest, str>(left_alt_down_result.expect_err());
+  }
+  left_alt_down = left_alt_down_result.expect();
+
+  right_alt_down_result = expect_obj_member_bool(node, "right_alt_down");
+  if right_alt_down_result.is_err() {
+    ret Err<KeyDownRequest, str>(right_alt_down_result.expect_err());
+  }
+  right_alt_down = right_alt_down_result.expect();
+
+  ctrl_down_result = expect_obj_member_bool(node, "ctrl_down");
+  if ctrl_down_result.is_err() {
+    ret Err<KeyDownRequest, str>(ctrl_down_result.expect_err());
+  }
+  ctrl_down = ctrl_down_result.expect();
+
+  request = KeyDownRequest(unicode, left_shift_down, right_shift_down, left_alt_down, right_alt_down, ctrl_down);
+  ret Ok<KeyDownRequest, str>(request);
+}

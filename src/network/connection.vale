@@ -207,9 +207,9 @@ func SetupGame(
 func SetSurfaceColor(self &!GameToDominoConnection, tileViewId i64, frontColor Vec4iAnimation) {
   self.commands!.add(SetSurfaceColorCommand(tileViewId, frontColor));
 }
-//     public void SetElevation(ulong tileViewId, int elevation) {
-//       commands.Add(new SetElevationCommand(tileViewId, elevation));
-//     }
+func SetElevation(self &!GameToDominoConnection, tileViewId i64, elevation int) {
+  self.commands!.add(SetElevationCommand(tileViewId, elevation));
+}
 //     public void RemoveItem(ulong tileViewId, ulong id) {
 //       commands.Add(new RemoveItemCommand(tileViewId, id));
 //     }

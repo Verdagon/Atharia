@@ -25,6 +25,19 @@ func expect_obj_member_int(obj &JsonObject, field_name str) Result<int, str> {
   ret Ok<int, str>(maybe_request_type_str.expect().value);
 }
 
+func expect_obj_member_bool(obj &JsonObject, field_name str) Result<bool, str> {
+  maybe_request_type_node = obj.fields.get(field_name);
+  if (maybe_request_type_node.isEmpty()) {
+    ret Err<bool, str>("Missing '{field_name}' field!");
+  }
+  request_type_node = maybe_request_type_node.get();
+  maybe_request_type_str = request_type_node.as<JsonBoolean>();
+  if (maybe_request_type_str.is_err()) {
+    ret Err<bool, str>("Expected '{field_name}' field to be a number!");
+  }
+  ret Ok<bool, str>(maybe_request_type_str.expect().value);
+}
+
 func expect_obj_member(obj &JsonObject, field_name str) Result<*JsonNode, str> {
   maybe_request_type_node = obj.fields.get(field_name);
   if (maybe_request_type_node.isEmpty()) {

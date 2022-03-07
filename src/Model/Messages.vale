@@ -169,11 +169,11 @@ struct SetSurfaceColorCommand {
   tileViewId i64;
   frontColor Vec4iAnimation;
 }
-//impl IDominoCommand for SetElevationCommand;
-//struct SetElevationCommand {
-//  tileViewId u64;
-//  elevation int;
-//}
+impl IDominoCommand for SetElevationCommand;
+struct SetElevationCommand {
+  tileViewId i64;
+  elevation int;
+}
 //impl IDominoCommand for RemoveItemCommand;
 //struct RemoveItemCommand {
 //  tileViewId u64;
