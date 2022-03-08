@@ -1,3 +1,0 @@
-sealed interface Vec4iAnimation { }
-
-abstract func clone(virtual self &Vec4iAnimation) Vec4iAnimation;

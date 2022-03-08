@@ -1,9 +1,0 @@
-
-//struct InitialUnit {
-//  location Location;
-//  dominoSymbol InitialSymbol;
-//  faceSymbol InitialSymbol;
-//  idToDetailSymbol ImmList<[ulong, InitialSymbol]>;
-//  hpRatio float;
-//  mpRatio float;
-//}

@@ -1,12 +1,13 @@
 import stdlib.*;
+import domino.*;
 import stdlib.path.*;
 import stdlib.resultutils.*;
 import rocketvale.*;
 import valejson.*;
 import stdlib.stringutils.*;
-import atharia.model.*;
-import atharia.model.animation.*;
-import atharia.network.*;
+import domino.model.*;
+import domino.model.animation.*;
+import domino.network.*;
 
 struct EditorServer {
   resourcesPath str;

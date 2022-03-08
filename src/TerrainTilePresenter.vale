@@ -281,8 +281,6 @@ func OnAddMember(self &!TerrainTilePresenter, member str) {
 func OnRemoveMember(self &!TerrainTilePresenter, index int) {
   println("Removing member at: " + index);
   [memberId, member] = self.members!.remove(index);
-  // var (memberId, member) = members[index];
-  // members.RemoveAt(index);
 
   foreach thing in self.vivimap.getEntries(member) {
     maybe_top_color = thing.as<TopColorDescriptionForIDescription>();

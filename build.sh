@@ -15,4 +15,4 @@ if [ "$STDLIB_DIR" == "" ]; then
 fi
 shift;
 
-$VALEC_DIR/valec build stdlib=$STDLIB_DIR/src atharia=src rocketvale=~/RocketVale/src rocketvale=~/RocketVale/src/native/rust/target/debug/librocketvale.a valejson=~/ValeJSON/src parseiter=~/ParseIter/src --output_dir build --region_override assist --llvm_ir true
+$VALEC_DIR/valec build stdlib=$STDLIB_DIR/src atharia=src domino=~/VDomino/src rocketvale=~/RocketVale/src rocketvale=~/RocketVale/src/native/rust/target/debug/librocketvale.a valejson=~/ValeJSON/src parseiter=~/ParseIter/src --output_dir build --region_override assist --llvm_ir true
