@@ -5,6 +5,7 @@ struct StartRequest {
 }
 
 func HandleStartRequest(
+  resourcesPath str,
   start_request &StartRequest)
 Result<EditorInstance, str> {
 
@@ -35,10 +36,14 @@ Result<EditorInstance, str> {
       6,
       List<str>()));
 
-  terrain_controller = TerrainController(&!domino, terrain);
+
+  vivimap = MemberToViewMapperLoadMap(resourcesPath, "vivimap.json");
+
+  terrain_controller = TerrainController(&!domino, &vivimap, terrain);
   instance =
     EditorInstance(
       domino,
+      vivimap,
       terrain_controller,
       HashSet<Location, LocationHasher, LocationEquator>(
         LocationHasher(), LocationEquator()));

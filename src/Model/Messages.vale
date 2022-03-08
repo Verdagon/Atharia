@@ -159,11 +159,11 @@ struct CreateTileCommand {
 //  tileId u64;
 //  symbol InitialSymbol;
 //}
-//impl IDominoCommand for SetCliffColorCommand;
-//struct SetCliffColorCommand {
-//  tileViewId u64;
-//  sideColor Vec4iAnimation;
-//}
+impl IDominoCommand for SetCliffColorCommand;
+struct SetCliffColorCommand {
+  tileViewId i64;
+  frontColor Vec4iAnimation;
+}
 impl IDominoCommand for SetSurfaceColorCommand;
 struct SetSurfaceColorCommand {
   tileViewId i64;

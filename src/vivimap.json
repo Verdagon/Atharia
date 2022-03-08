@@ -1,15 +1,15 @@
 {
   "grass": {
     "surface_color": [0, 75, 0],
-    "wall_color": [0, 50, 0],
+    "wall_color": [0, 50, 0]
   },
   "dirt": {
     "surface_color": [100, 32, 0],
-    "wall_color": [64, 25, 0],
+    "wall_color": [64, 25, 0]
   },
   "mud": {
     "surface_color": [50, 16, 0],
-    "wall_color": [32, 12, 0],
+    "wall_color": [32, 12, 0]
   },
   "rocks": {
     "overlay": {
@@ -49,7 +49,7 @@
     "unit": {
       "domino": {
         "glyph": { "symbol_id": {"font_name": "AthSymbols", "unicode": 123}, "color": [128, 0, 0] },
-        "outline": {"type": "centered", "color": [255, 0, 0] },
+        "outline": {"type": "centered", "color": [255, 0, 0] }
       },
       "face": {
         "glyph": { "symbol_id": {"font_name": "AthSymbols", "unicode": 120}, "color": [255, 255, 255, 380] },

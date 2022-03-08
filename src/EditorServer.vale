@@ -1,4 +1,6 @@
 import stdlib.*;
+import stdlib.path.*;
+import stdlib.resultutils.*;
 import rocketvale.*;
 import valejson.*;
 import stdlib.stringutils.*;
@@ -7,39 +9,16 @@ import atharia.model.animation.*;
 import atharia.network.*;
 
 struct EditorServer {
+  resourcesPath str;
   instance! Opt<EditorInstance>;
 }
 impl IRequestHandler for EditorServer;
 
 struct EditorInstance {
   domino GameToDominoConnection;
+  vivimap MemberToViewMapper;
   terrainController TerrainController;
   selectedLocations! HashSet<Location, LocationHasher, LocationEquator>;
-}
-
-func makeKeyCodeToMemberMap() {
-  map = HashMap<str, str, StrHasher, StrEquator>();
-  map.add("b", "fire");
-  map.add("g", "grass");
-  map.add("m", "mud");
-  map.add("d", "dirt");
-  map.add("r", "rocks");
-  map.add("o", "obsidian");
-  map.add("s", "darkRocks");
-  map.add("x", "marker");
-  map.add("c", "cave");
-  map.add("f", "floor");
-  map.add("t", "tree");
-  map.add("l", "magma");
-  map.add("h", "healthPotion");
-  map.add("p", "manaPotion");
-  map.add("w", "caveWall");
-  map.add("z", "obsidianFloor");
-  map.add("v", "avelisk");
-  map.add("y", "zeddy");
-  map.add("#", "wall");
-  map.add("`", "water");
-  ret map;
 }
 
 func HandleEvent(
@@ -59,7 +38,7 @@ Result<JsonNode, str> {
     }
     request = (maybe_request).expect();
 
-    maybe_instance = HandleStartRequest(&request);
+    maybe_instance = HandleStartRequest(server.resourcesPath, &request);
     if maybe_instance.is_err() {
       ret Err<JsonNode, str>(maybe_instance.expect_err());
     }
@@ -122,11 +101,11 @@ func handle(self &!EditorServer impl IRequestHandler, request_path str, request_
   }
   request_root_node = (maybe_request_root_node).expect();
 
-  maybe_request_root_obj = request_root_node.as<JsonObject>();
+  maybe_request_root_obj = (request_root_node).as<JsonObject>();
   if maybe_request_root_obj.is_err() {
     ret "Request wasn't json object!";
   }
-  request_root_obj = maybe_request_root_obj.expect();
+  request_root_obj = (maybe_request_root_obj).expect();
 
   response_obj_result = HandleEvent(self, &request_root_obj);
   if response_obj_result.is_err() {
@@ -175,6 +154,83 @@ func SetSelection(
   //membersView.ShowEntries(entries);
 }
 
+func ChangeMember(
+    server &!EditorInstance,
+    member str,
+    addKeyDown bool,
+    removeKeyDown bool) {
+  if (addKeyDown and removeKeyDown) {
+    ret void();
+  } else if (addKeyDown) {
+    // Add one to each tile
+    foreach loc in server.selectedLocations {
+      presenter = (server.terrainController.tilePresenters.get(loc)).get();
+      presenter!.AddMember(member);
+    }
+  } else if (removeKeyDown) {
+    foreach loc in server.selectedLocations {
+      presenter = (server.terrainController.tilePresenters.get(loc)).get();
+      if (server.LocationHasMember(loc, member)) {
+        presenter!.RemoveMember(member);
+      }
+    }
+  } else {
+    // Toggle; ensure it's there if its not
+    if (not server.AllLocationsHaveMember(&server.selectedLocations, member)) {
+      foreach loc in server.selectedLocations {
+        presenter = (server.terrainController.tilePresenters.get(loc)).get();
+        // Add it if its not already there
+        if (not server.LocationHasMember(loc, member)) {
+          presenter!.AddMember(member);
+        }
+      }
+    } else {
+      foreach loc in server.selectedLocations {
+        presenter = (server.terrainController.tilePresenters.get(loc)).get();
+        // Remove all of them that are present
+        while (server.LocationHasMember(loc, member)) {
+          presenter!.RemoveMember(member);
+        }
+      }
+    }
+  }
+}
+
+
+func AllLocationsHaveMember(
+    server &EditorInstance,
+    locations &HashSet<Location, LocationHasher, LocationEquator>,
+    member str)
+bool {
+  foreach location in locations {
+    if not server.LocationHasMember(location, member) {
+      ret false;
+    }
+  }
+  ret true;
+}
+
+func LocationHasMember(
+    server &EditorInstance,
+    location Location,
+    member str)
+bool {
+  foreach hayMember in server.terrainController.terrain.tiles.get(location).get().members {
+    if member == hayMember {
+      ret true;
+    }
+  }
+  ret false;
+}
+
+
+// TODO:
+// - put the panic back in in MemberToViewMapper, we were hitting constraint violations,
+//   need to be able to unlet some locals for it.
 exported func main() {
-  runServer(&EditorServer(None<EditorInstance>()));
+  if numMainArgs() < 2 {
+    panic("Supply resources path!");
+  }
+  resourcesPath = getMainArg(1);
+  runServer(&EditorServer(resourcesPath, None<EditorInstance>()));
 }

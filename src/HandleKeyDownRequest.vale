@@ -3,9 +3,9 @@ struct KeyDownRequest {
   unicode int;
   leftShiftDown bool;
   rightShiftDown bool;
-  ctrlDown bool;
   leftAltDown bool;
   rightAltDown bool;
+  ctrlDown bool;
 }
 
 func HandleKeyDownRequest(
@@ -28,11 +28,30 @@ Result<(), str> {
   } else if c == 61 { // = and + and -2
     foreach loc in server.selectedLocations {
       presenter = (server.terrainController.tilePresenters.get(loc)).get();
-      presenter!.SetElevation(server.terrainController.terrain.tiles.get(loc).get().elevation + 1);
+      oldElevation = server.terrainController.terrain.tiles.get(loc).get().elevation;
+      presenter!.SetElevation(oldElevation + 1);
     }
     //Save();
     //UpdateLookPanelView();
-    //break;
+  } else if c == 45 { // - and _ and -1
+    foreach loc in server.selectedLocations {
+      presenter = (server.terrainController.tilePresenters.get(loc)).get();
+      oldElevation = server.terrainController.terrain.tiles.get(loc).get().elevation;
+      newElevation = max(1, oldElevation - 1);
+      presenter!.SetElevation(newElevation);
+    }
+    //Save();
+    //UpdateLookPanelView();
+  }
+  keyCodeToMemberMap = makeKeyCodeToMemberMap();
+  foreach [keyCode, member] in keyCodeToMemberMap {
+    if c == keyCode.toAscii() {
+      addKeyDown = rightAltDown;
+      removeKeyDown = leftAltDown;
+      server!.ChangeMember(member, addKeyDown, removeKeyDown);
+      //Save();
+    }
+    //UpdateLookPanelView();
   }
 
   ret Ok<(), str>(());
@@ -94,13 +113,29 @@ Result<(), str> {
   //    UpdateLookPanelView();
   //    break;
   //}
-  //foreach (var keyCodeAndMember in MemberStuff.memberByKeyCode) {
-  //  if (c == keyCodeAndMember.Key) {
-  //    bool addKeyDown = rightAltDown;
-  //    bool removeKeyDown = leftAltDown;
-  //    ChangeMember(keyCodeAndMember.Value, addKeyDown, removeKeyDown);
-  //    Save();
-  //  }
-  //  UpdateLookPanelView();
-  //}
+}
+
+func makeKeyCodeToMemberMap() HashMap<str, str, StrHasher, StrEquator> {
+  map = HashMap<str, str, StrHasher, StrEquator>(StrHasher(), StrEquator());
+  map!.add("#", "wall");
+  map!.add("`", "water");
+  map!.add("b", "fire");
+  map!.add("c", "cave");
+  map!.add("d", "dirt");
+  map!.add("f", "floor");
+  map!.add("g", "grass");
+  map!.add("h", "healthPotion");
+  map!.add("l", "magma");
+  map!.add("m", "mud");
+  map!.add("o", "obsidian");
+  map!.add("p", "manaPotion");
+  map!.add("r", "rocks");
+  map!.add("s", "darkRocks");
+  map!.add("t", "tree");
+  map!.add("v", "avelisk");
+  map!.add("w", "caveWall");
+  map!.add("x", "marker");
+  map!.add("y", "zeddy");
+  map!.add("z", "obsidianFloor");
+  ret map;
 }

@@ -201,11 +201,11 @@ func SetupGame(
 //     public void SetFeature(ulong tileViewId, InitialSymbol maybeFeature) {
 //       commands.Add(new SetFeatureCommand(tileViewId, maybeFeature));
 //     }
-//     public void SetCliffColor(ulong tileViewId, Vec4iAnimation sideColor) {
-//       commands.Add(new SetCliffColorCommand(tileViewId, sideColor));
-//     }
 func SetSurfaceColor(self &!GameToDominoConnection, tileViewId i64, frontColor Vec4iAnimation) {
   self.commands!.add(SetSurfaceColorCommand(tileViewId, frontColor));
+}
+func SetCliffColor(self &!GameToDominoConnection, tileViewId i64, cliffColor Vec4iAnimation) {
+  self.commands!.add(SetCliffColorCommand(tileViewId, cliffColor));
 }
 func SetElevation(self &!GameToDominoConnection, tileViewId i64, elevation int) {
   self.commands!.add(SetElevationCommand(tileViewId, elevation));

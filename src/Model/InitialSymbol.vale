@@ -1,28 +1,28 @@
 
-// func NoOutline() int { 0 }
-// func OuterOutline() int { 1 }
-// func CenteredOutline() int { 2 }
+func NoOutline() int { 0 }
+func OuterOutline() int { 1 }
+func CenteredOutline() int { 2 }
 
 
-// struct InitialSymbolGlyph imm {
-//   symbolId SymbolId;
-//   color Vec4iAnimation;
-// }
+struct InitialSymbolGlyph {
+  symbolId SymbolId;
+  color Vec4iAnimation;
+}
 
-// struct InitialSymbolOutline imm {
-//   mode OutlineMode;
-//   color Vec4iAnimation;
-// }
+struct InitialSymbolOutline {
+  mode int;
+  color Vec4iAnimation;
+}
 
-// struct InitialSymbolSides imm {
-//   depthPercent int;
-//   color Vec4iAnimation;
-// }
+struct InitialSymbolSides {
+  depthPercent int;
+  color Vec4iAnimation;
+}
 
-// struct InitialSymbol imm {
-//   glyph InitialSymbolGlyph;
-//   outline InitialSymbolOutline;
-//   sides InitialSymbolSides;
-//   rotationDegrees int;
-//   sizePercent int;
-// }
+struct InitialSymbol {
+  glyph InitialSymbolGlyph;
+  outline InitialSymbolOutline;
+  sides InitialSymbolSides;
+  rotationDegrees int;
+  sizePercent int;
+}

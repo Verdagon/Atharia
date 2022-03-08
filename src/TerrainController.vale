@@ -11,10 +11,9 @@ struct TerrainController {
 //   public OnTerrainTileHovered TerrainTileHovered;
 //   public OnTerrainTileClicked TerrainTileClicked;
 //   public OnPhantomTileClicked PhantomTileClicked;
-//   
-//   MemberToViewMapper vivimap;
 
   domino &!GameToDominoConnection;
+  vivimap &MemberToViewMapper;
   terrain Terrain;
 
   tilePresenters HashMap<Location, TerrainTilePresenter, LocationHasher, LocationEquator>;
@@ -27,16 +26,16 @@ struct TerrainController {
 
 func TerrainController(
     domino &!GameToDominoConnection,
-    //MemberToViewMapper vivimap,
+    vivimap &MemberToViewMapper,
     terrain Terrain)
 TerrainController {
   //this.domino = domino;
-  // this.vivimap = vivimap;
   //this.terrain = terrain;
 
   self =
     TerrainController(
       domino,
+      vivimap,
       terrain,
       HashMap<Location, TerrainTilePresenter, LocationHasher, LocationEquator>(
         LocationHasher(), LocationEquator()),
@@ -142,7 +141,7 @@ func AddTerrainTile(self &!TerrainController, location Location, tile &!TerrainT
   presenter =
     TerrainTilePresenter(
       &!self.domino,
-      // vivimap,
+      self.vivimap,
       &!self.terrain,
       tile,
       location);

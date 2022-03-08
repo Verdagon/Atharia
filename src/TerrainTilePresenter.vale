@@ -1,7 +1,7 @@
 
 struct TerrainTilePresenter {
   domino &!GameToDominoConnection;
-//     private MemberToViewMapper vivimap;
+  vivimap &MemberToViewMapper;
   terrain &!Terrain;
   terrainTile &!TerrainTile;
   location Location;
@@ -30,7 +30,7 @@ struct TerrainTilePresenter {
 
 func TerrainTilePresenter(
   domino &!GameToDominoConnection,
-  // MemberToViewMapper vivimap,
+  vivimap &MemberToViewMapper,
   terrain &!Terrain,
   terrainTile &!TerrainTile,
   location Location)
@@ -67,7 +67,7 @@ TerrainTilePresenter {
   self =
     TerrainTilePresenter(
       domino,
-      // vivimap;
+      vivimap,
       terrain,
       terrainTile,
       location,
@@ -93,13 +93,11 @@ TerrainTilePresenter {
 
   ret self;
 }
-// 
-//     private bool initialized => tileViewId != 0;
-// 
-//     // private InitialTile MakeInitialTile() {
-//     //   
-//     // }
-// 
+
+func initialized(self &TerrainTilePresenter) bool {
+  ret self.tileViewId != 0i64;
+}
+
 //     private static Vec3 CalculatePosition(int elevationStepHeight, Pattern pattern, Location location, int elevation) {
 //       var positionVec2 = pattern.GetTileCenter(location);
 //       var positionVec3 = new Vec3(positionVec2.x, positionVec2.y, elevation * elevationStepHeight);
@@ -130,7 +128,7 @@ func RefreshSurfaceColor(self &!TerrainTilePresenter) {
 func RefreshSideColor(self &!TerrainTilePresenter) {
   self.domino!.SetCliffColor(
     self.tileViewId,
-    membersSideColors.get(membersSideColors.len() - 1).1);
+    self.membersSideColors.get(self.membersSideColors.len() - 1).1.clone());
 }
 //     
 //     private void RefreshFeature() {
@@ -200,24 +198,33 @@ func RefreshSideColor(self &!TerrainTilePresenter) {
 // 
 
 func OnAddMember(self &!TerrainTilePresenter, member str) {
+  println("Adding member: " + member);
   memberId = set self.nextMemberId = self.nextMemberId + 1i64;
   self.members!.add((memberId, member));
-  // foreach (var thing in vivimap.getEntries(member)) {
-  //   if (thing is MemberToViewMapper.TopColorDescriptionForIDescription topColor) {
-  //     membersFrontColors.Add((memberId, topColor.color));
-  //     if (initialized) {
-  //       if (tileViewId != 0) {
-  //         RefreshSurfaceColor();
-  //       }
-  //     }
-  //   } else if (thing is MemberToViewMapper.SideColorDescriptionForIDescription sideColor) {
-  //     membersSideColors.Add((memberId, sideColor.color));
-  //     if (initialized) {
-  //       if (tileViewId != 0) {
-  //         RefreshSideColor();
-  //       }
-  //     }
-  //   } else if (thing is MemberToViewMapper.OverlayDescriptionForIDescription overlay) {
+  foreach thing in self.vivimap.getEntries(member) {
+    maybe_top_color = thing.as<TopColorDescriptionForIDescription>();
+    if maybe_top_color.is_ok() {
+      top_color = &maybe_top_color.expect();
+
+      self.membersFrontColors!.add((memberId, top_color.color.clone()));
+      if self.initialized() {
+        if (self.tileViewId != 0i64) {
+          self!.RefreshSurfaceColor();
+        }
+      }
+    }
+
+    maybe_side_color = thing.as<SideColorDescriptionForIDescription>();
+    if maybe_side_color.is_ok() {
+      side_color = &maybe_side_color.expect();
+      self.membersSideColors!.add((memberId, side_color.color.clone()));
+      if self.initialized() {
+        if (self.tileViewId != 0i64) {
+          self!.RefreshSideColor();
+        }
+      }
+    }
+  // else if (thing is MemberToViewMapper.OverlayDescriptionForIDescription overlay) {
   //     membersOverlays.Add((memberId, overlay.symbol));
   //     if (initialized) {
   //       if (tileViewId != 0) {
@@ -268,70 +275,96 @@ func OnAddMember(self &!TerrainTilePresenter, member str) {
   //   } else {
   //     Asserts.Assert(false);
   //   }
-  // }
+  }
 }
 
-//     public void OnRemoveMember(int index) {
-//       var (memberId, member) = members[index];
-//       members.RemoveAt(index);
-//       foreach (var thing in vivimap.getEntries(member)) {
-//         if (thing is MemberToViewMapper.TopColorDescriptionForIDescription topColor) {
-//           membersFrontColors.RemoveAll(x => x.Item1 == memberId);
-//           if (tileViewId != 0) {
-//             RefreshSurfaceColor();
-//           }
-//         } else if (thing is MemberToViewMapper.SideColorDescriptionForIDescription sideColor) {
-//           membersSideColors.RemoveAll(x => x.Item1 == memberId);
-//           if (tileViewId != 0) {
-//             RefreshSideColor();
-//           }
-//         } else if (thing is MemberToViewMapper.OverlayDescriptionForIDescription overlay) {
-//           membersOverlays.RemoveAll(x => x.Item1 == memberId);
-//           if (tileViewId != 0) {
-//             RefreshOverlay();
-//           }
-//         } else if (thing is MemberToViewMapper.FeatureDescriptionForIDescription feature) {
-//           membersFeatures.RemoveAll(x => x.Item1 == memberId);
-//           if (tileViewId != 0) {
-//             RefreshFeature();
-//           }
-//         } else if (thing is MemberToViewMapper.DominoShapeDescriptionForIDescription dominoShape) {
-//           membersDominoSymbols.RemoveAll(x => x.Item1 == memberId);
-//           if (unitViewId != 0) {
-//             RefreshDomino();
-//           }
-//         } else if (thing is MemberToViewMapper.FaceDescriptionForIDescription face) {
-//           membersUnitFaces.RemoveAll(x => x.Item1 == memberId);
-//           if (unitViewId != 0) {
-//             RefreshUnitFace();
-//           }
-//         } else if (thing is MemberToViewMapper.DetailDescriptionForIDescription detail) {
-//           membersDetails.RemoveAll(x => x.Item1 == memberId);
-//           if (unitViewId != 0) {
-//             RefreshDetails();
-//           }
-//         } else if (thing is MemberToViewMapper.ItemDescriptionForIDescription item) {
-//           membersItems.RemoveAll(x => x.Item1 == memberId);
-//           if (tileViewId != 0) {
-//             RefreshItems();
-//           }
-//         } else {
-//           Asserts.Assert(false);
-//         }
-//       }
-//     }
-// 
-//     public void AddMember(string member) {
-//       terrainTile.members.Add(member);
-//       OnAddMember(member);
-//     }
-// 
-//     public void RemoveMember(string member) {
-//       int index = terrainTile.members.IndexOf(member);
-//       Asserts.Assert(index >= 0);
-//       terrainTile.members.RemoveAt(index);
-//       OnRemoveMember(index);
-//     }
+func OnRemoveMember(self &!TerrainTilePresenter, index int) {
+  println("Removing member at: " + index);
+  [memberId, member] = self.members!.remove(index);
+  // var (memberId, member) = members[index];
+  // members.RemoveAt(index);
+
+  foreach thing in self.vivimap.getEntries(member) {
+    maybe_top_color = thing.as<TopColorDescriptionForIDescription>();
+    if maybe_top_color.is_ok() {
+      top_color = &maybe_top_color.expect();
+
+      matching_member_index = self.membersFrontColors.indexWhere({_.0 == memberId}).get();
+      self.membersFrontColors!.remove(matching_member_index);
+
+      if self.tileViewId != 0i64 {
+        self!.RefreshSurfaceColor();
+      }
+    }
+
+    maybe_side_color = thing.as<SideColorDescriptionForIDescription>();
+    if maybe_side_color.is_ok() {
+      side_color = &maybe_side_color.expect();
+
+      matching_member_index = self.membersSideColors.indexWhere({_.0 == memberId}).get();
+      self.membersSideColors!.remove(matching_member_index);
+
+      if self.tileViewId != 0i64 {
+        self!.RefreshSideColor();
+      }
+    }
+
+  //  if (thing is MemberToViewMapper.TopColorDescriptionForIDescription topColor) {
+  //    membersFrontColors.RemoveAll(x => x.Item1 == memberId);
+  //    if (tileViewId != 0) {
+  //      RefreshSurfaceColor();
+  //    }
+  //  } else if (thing is MemberToViewMapper.SideColorDescriptionForIDescription sideColor) {
+  //    membersSideColors.RemoveAll(x => x.Item1 == memberId);
+  //    if (tileViewId != 0) {
+  //      RefreshSideColor();
+  //    }
+  //  } else if (thing is MemberToViewMapper.OverlayDescriptionForIDescription overlay) {
+  //    membersOverlays.RemoveAll(x => x.Item1 == memberId);
+  //    if (tileViewId != 0) {
+  //      RefreshOverlay();
+  //    }
+  //  } else if (thing is MemberToViewMapper.FeatureDescriptionForIDescription feature) {
+  //    membersFeatures.RemoveAll(x => x.Item1 == memberId);
+  //    if (tileViewId != 0) {
+  //      RefreshFeature();
+  //    }
+  //  } else if (thing is MemberToViewMapper.DominoShapeDescriptionForIDescription dominoShape) {
+  //    membersDominoSymbols.RemoveAll(x => x.Item1 == memberId);
+  //    if (unitViewId != 0) {
+  //      RefreshDomino();
+  //    }
+  //  } else if (thing is MemberToViewMapper.FaceDescriptionForIDescription face) {
+  //    membersUnitFaces.RemoveAll(x => x.Item1 == memberId);
+  //    if (unitViewId != 0) {
+  //      RefreshUnitFace();
+  //    }
+  //  } else if (thing is MemberToViewMapper.DetailDescriptionForIDescription detail) {
+  //    membersDetails.RemoveAll(x => x.Item1 == memberId);
+  //    if (unitViewId != 0) {
+  //      RefreshDetails();
+  //    }
+  //  } else if (thing is MemberToViewMapper.ItemDescriptionForIDescription item) {
+  //    membersItems.RemoveAll(x => x.Item1 == memberId);
+  //    if (tileViewId != 0) {
+  //      RefreshItems();
+  //    }
+  //  } else {
+  //    Asserts.Assert(false);
+  //  }
+  }
+}
+
+func AddMember(self &!TerrainTilePresenter, member str) {
+  self.terrainTile.members!.add(member);
+  self!.OnAddMember(member);
+}
+
+func RemoveMember(self &!TerrainTilePresenter, member str) {
+  index = self.terrainTile.members.indexOf(member).get();
+  self.terrainTile.members!.remove(index);
+  self!.OnRemoveMember(index);
+}
 // 
 //     public void RemoveMemberAt(int index) {
 //       terrainTile.members.RemoveAt(index);
