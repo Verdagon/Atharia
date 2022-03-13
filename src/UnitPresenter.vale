@@ -45,19 +45,82 @@ UnitPresenter {
   ret self;
 }
 
-func HopTo(self &!UnitPresenter, newLoc Location, newElevation int) {
+func HopTo(self &!UnitPresenter, server &!EditorInstance, newLoc Location, newElevation int) {
+  if server.locToUnit.ContainsKey(self.unit.location) {
+    println("locToUnit.remove {self.unit.location}");
+    server.locToUnit!.remove(self.unit.location);
+  } else {
+    println("locToUnit.contains {self.unit.location} was false!");
+  }
+  println("unoccupiedWalkableLocs.add {self.unit.location}");
+  server.unoccupiedWalkableLocs!.add(self.unit.location);
   set self.unit.location = newLoc;
   set self.unit.elevation = newElevation;
   self.domino!.UnitHopTo(self.unitViewId, newLoc, newElevation);
+  if server.unoccupiedWalkableLocs.contains(self.unit.location) {
+    println("unoccupiedWalkableLocs.remove {self.unit.location}");
+    server.unoccupiedWalkableLocs!.remove(self.unit.location);
+  } else {
+    println("unoccupiedWalkableLocs.contains {self.unit.location} was false!");
+  }
+  println("locToUnit.add {self.unit.location}");
+  server.locToUnit!.add(self.unit.location, self.unit);
 }
 
 func Act(self &!UnitPresenter, server &!EditorInstance) {
-  path = List<Location>();
-  if path.len() == 0 {
-    // do nothing
-    ret void();
+  println("unit {self.unit.id} acting!");
+
+  path =
+      Go(
+          &server.terrainController.terrain.pattern,
+          self.unit.location,
+          server.player.get().location,
+          true,
+          (a, b, distanceSoFar) => {
+            if distanceSoFar > 10000 {
+              ret false;
+            }
+            server.terrainController.terrain.tiles.ContainsKey(b) and
+            server.terrainController.terrain.pattern.IsAdjacent(a, b, false)
+          });
+  maybeNextStepLoc Opt<Location> =
+    if path.len() > 0 {
+      if server.unoccupiedWalkableLocs.contains(path.get(0)) {
+        x Opt<Location> = Some(path.get(0));
+        x
+      } else {
+        // do nothing
+        x Opt<Location> = None<Location>();
+        x
+      }
+    } else {
+      adjacents =
+          server.terrainController.terrain.GetAdjacentExistingLocations(
+              self.unit.location, false);
+      possibleWanderLocs = List<Location>();
+      foreach adjacent in adjacents {
+        if server.unoccupiedWalkableLocs.contains(adjacent) {
+          possibleWanderLocs!.add(adjacent);
+        }
+      }
+      if possibleWanderLocs.len() == 0 {
+        // do nothing
+        x Opt<Location> = None<Location>();
+        x
+      } else {
+        index = abs(TruncateI64ToI32(server.rand!.Next())) mod possibleWanderLocs.len();
+        wanderLoc = possibleWanderLocs.get(index);
+        x Opt<Location> = Some(wanderLoc);
+        x
+      }
+    };
+
+  if not maybeNextStepLoc.isEmpty() {
+    nextStepLoc = maybeNextStepLoc.get();
+
+    nextStepElevation =
+        server.terrainController.terrain.tiles.get(nextStepLoc).get().elevation;
+
+    self!.HopTo(server, nextStepLoc, nextStepElevation);
   }
-  nextStepLoc = path.get(0);
-  nextStepElevation = server.terrainController.terrain.tiles.get(nextStepLoc).get().elevation;
-  self!.HopTo(nextStepLoc, nextStepElevation);
 }

@@ -21,8 +21,10 @@ Result<EditorInstance, str> {
   foreach [loc, walkable] in bool_map.tiles {
     if walkable {
       terrain.tiles!.add(loc, TerrainTile(loc, 2, walkable));
+      println("unoccupiedWalkableLocs.add {loc}");
       unoccupiedWalkableLocs!.add(loc);
     } else {
+      println("unoccupiedWalkableLocs.add {loc}");
       terrain.tiles!.add(loc, TerrainTile(loc, 1, walkable))
     }
   }
@@ -50,8 +52,10 @@ Result<EditorInstance, str> {
   terrain_controller = TerrainController(&!domino, &vivimap, terrain, 200);
 
   borrow_domino = &!domino;
+  borrow_rand = &!rand;
   instance =
       EditorInstance(
+          rand,
           domino,
           vivimap,
           None<Location>(),
@@ -65,9 +69,12 @@ Result<EditorInstance, str> {
           unoccupiedWalkableLocs,
           None<&!Unit>());
 
+  println("setting up player");
   playerElevation = instance.terrainController.terrain.tiles.get(playerLoc).get().elevation;
   player = Unit(100, playerLoc, playerElevation);
+  println("locToUnit.add {player.location}");
   instance.locToUnit!.add(player.location, &!player);
+  println("unoccupiedWalkableLocs.remove {player.location}");
   instance.unoccupiedWalkableLocs!.remove(player.location);
   borrow_player = &!player;
   instance.units!.add(player.id, player);
@@ -75,12 +82,15 @@ Result<EditorInstance, str> {
 
   set instance.player = Some(borrow_player);
 
+  println("setting up enemies");
   foreach i in range(0, 10) {
-    enemyLoc = instance.unoccupiedWalkableLocs.GetRandomElement(TruncateI64ToI32(rand!.Next())).get("No eligible enemy loc?");
+    enemyLoc = instance.unoccupiedWalkableLocs.GetRandomElement(TruncateI64ToI32(borrow_rand!.Next())).get("No eligible enemy loc?");
     vassert(not instance.locToUnit.ContainsKey(enemyLoc), "Already unit there?");
     enemyElevation = instance.terrainController.terrain.tiles.get(enemyLoc).get().elevation;
     enemy = Unit(101 + i, enemyLoc, 2);
+    println("locToUnit.add {enemy.location}");
     instance.locToUnit!.add(enemy.location, &!enemy);
+    println("unoccupiedWalkableLocs.remove {enemy.location}");
     instance.unoccupiedWalkableLocs!.remove(enemy.location);
     borrow_enemy = &!enemy;
     instance.units!.add(enemy.id, enemy);

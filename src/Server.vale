@@ -18,6 +18,7 @@ struct EditorServer {
 impl IRequestHandler for EditorServer;
 
 struct EditorInstance {
+  rand XS32Rand;
   domino GameToDominoConnection;
   vivimap MemberToViewMapper;
   maybeLookedLocation! Opt<Location>;
