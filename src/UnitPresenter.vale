@@ -46,23 +46,23 @@ UnitPresenter {
 }
 
 func HopTo(self &!UnitPresenter, server &!EditorInstance, newLoc Location, newElevation int) {
-  if server.locToUnit.ContainsKey(self.unit.location) {
+  //if server.locToUnit.ContainsKey(self.unit.location) {
     println("locToUnit.remove {self.unit.location}");
     server.locToUnit!.remove(self.unit.location);
-  } else {
-    println("locToUnit.contains {self.unit.location} was false!");
-  }
+  //} else {
+  //  println("locToUnit.contains {self.unit.location} was false!");
+  //}
   println("unoccupiedWalkableLocs.add {self.unit.location}");
   server.unoccupiedWalkableLocs!.add(self.unit.location);
   set self.unit.location = newLoc;
   set self.unit.elevation = newElevation;
   self.domino!.UnitHopTo(self.unitViewId, newLoc, newElevation);
-  if server.unoccupiedWalkableLocs.contains(self.unit.location) {
+  //if server.unoccupiedWalkableLocs.contains(self.unit.location) {
     println("unoccupiedWalkableLocs.remove {self.unit.location}");
     server.unoccupiedWalkableLocs!.remove(self.unit.location);
-  } else {
-    println("unoccupiedWalkableLocs.contains {self.unit.location} was false!");
-  }
+  //} else {
+  //  println("unoccupiedWalkableLocs.contains {self.unit.location} was false!");
+  //}
   println("locToUnit.add {self.unit.location}");
   server.locToUnit!.add(self.unit.location, self.unit);
 }
@@ -80,7 +80,7 @@ func Act(self &!UnitPresenter, server &!EditorInstance) {
             if distanceSoFar > 10000 {
               ret false;
             }
-            server.terrainController.terrain.tiles.ContainsKey(b) and
+            server.unoccupiedWalkableLocs.contains(b) and
             server.terrainController.terrain.pattern.IsAdjacent(a, b, false)
           });
   maybeNextStepLoc Opt<Location> =
