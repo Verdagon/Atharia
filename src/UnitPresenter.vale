@@ -1,0 +1,52 @@
+
+struct UnitPresenter {
+  domino &!GameToDominoConnection;
+  unit &!Unit;
+
+  unitViewId! i64;
+}
+
+func UnitPresenter(
+  domino &!GameToDominoConnection,
+  unit &!Unit)
+UnitPresenter {
+  unitViewId =
+      domino!.CreateUnit(
+          InitialUnit(
+            unit.location,
+            InitialSymbol(
+                InitialSymbolGlyph(
+                    SymbolId("AthSymbols", 123),
+                    ConstantVec4iAnimation(Vec4i(128, 0, 0, 255))),
+                Some(
+                    InitialSymbolOutline(
+                        CenteredOutline(),
+                        ConstantVec4iAnimation(Vec4i(255, 0, 0, 255)))),
+                None<InitialSymbolSides>(),
+                0,
+                100),
+            InitialSymbol(
+                InitialSymbolGlyph(
+                    SymbolId("AthSymbols", 120),
+                    ConstantVec4iAnimation(Vec4i(255, 255, 255, 380))),
+                Some(
+                    InitialSymbolOutline(
+                        CenteredOutline(),
+                        ConstantVec4iAnimation(Vec4i(0, 0, 0, 255)))),
+                None<InitialSymbolSides>(),
+                0,
+                100),
+            List<(i64, InitialSymbol)>(),
+            100,
+            100));
+
+  self = UnitPresenter(domino, unit, unitViewId);
+
+  ret self;
+}
+
+func HopTo(self &!UnitPresenter, newLoc Location, newElevation int) {
+  set self.unit.location = newLoc;
+  set self.unit.elevation = newElevation;
+  self.domino!.UnitHopTo(self.unitViewId, newLoc, newElevation);
+}

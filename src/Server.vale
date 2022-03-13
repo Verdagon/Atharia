@@ -6,6 +6,8 @@ import rocketvale.*;
 import valejson.*;
 import stdlib.stringutils.*;
 import domino.model.*;
+import terrain.*;
+import terrain.model.*;
 import domino.model.animation.*;
 import domino.network.*;
 
@@ -18,8 +20,17 @@ impl IRequestHandler for EditorServer;
 struct EditorInstance {
   domino GameToDominoConnection;
   vivimap MemberToViewMapper;
+  maybeLookedLocation! Opt<Location>;
+  membersView ListView;
+  lookPanelView LookPanelView;
+  lookatOffsetToCamera Vec3i;
   terrainController TerrainController;
-  selectedLocations! HashSet<Location, LocationHasher, LocationEquator>;
+  // turn this into a HashSet based on Unit, perhaps casting pointer to integer
+  units HashMap<int, Unit, IntHasher, IntEquator>;
+  unitPresenters HashMap<int, UnitPresenter, IntHasher, IntEquator>;
+  locToUnit HashMap<Location, &!Unit, LocationHasher, LocationEquator>;
+  unoccupiedWalkableLocs HashSet<Location, LocationHasher, LocationEquator>;
+  player! Opt<&!Unit>;
 }
 
 func HandleEvent(
@@ -117,120 +128,49 @@ func handle(self &!EditorServer impl IRequestHandler, request_path str, request_
   ret "Response: " + response_obj.str();
 }
 
-func SetSelection(
-    server &!EditorInstance,
-    locations HashSet<Location, LocationHasher, LocationEquator>) {
-  set server.selectedLocations =
-      locations.HashSet<Location, LocationHasher, LocationEquator>(
-          LocationHasher(), LocationEquator());
-
-  server.terrainController!.SetSelectedLocations(locations);
-
-  //SortedSet<string> commonMembers = null;
-  //foreach (var loc in selectedLocations) {
-  //  if (commonMembers == null) {
-  //    commonMembers = new SortedSet<string>();
-  //    foreach (var member in terrainController.terrain.tiles[loc].members) {
-  //      commonMembers.Add(member);
-  //    }
-  //  } else {
-  //    var members = new SortedSet<string>();
-  //    foreach (var member in terrainController.terrain.tiles[loc].members) {
-  //      members.Add(member);
-  //    }
-  //    foreach (var member in new SortedSet<string>(commonMembers)) {
-  //      if (!members.Contains(member)) {
-  //        commonMembers.Remove(member);
-  //      }
-  //    }
-  //  }
-  //}
-
-  //var entries = new List<ListView.Entry>();
-  //if (commonMembers != null) {
-  //  foreach (var member in commonMembers) {
-  //    entries.Add(new ListView.Entry(new SymbolId("AthSymbols", 0x0072), member));
-  //  }
-  //}
-  //membersView.ShowEntries(entries);
-}
-
-func ChangeMember(
-    server &!EditorInstance,
-    member str,
-    addKeyDown bool,
-    removeKeyDown bool) {
-  if (addKeyDown and removeKeyDown) {
-    ret void();
-  } else if (addKeyDown) {
-    // Add one to each tile
-    foreach loc in server.selectedLocations {
-      presenter = (server.terrainController.tilePresenters.get(loc)).get();
-      presenter!.AddMember(member);
-    }
-  } else if (removeKeyDown) {
-    foreach loc in server.selectedLocations {
-      presenter = (server.terrainController.tilePresenters.get(loc)).get();
-      if (server.LocationHasMember(loc, member)) {
-        presenter!.RemoveMember(member);
-      }
-    }
-  } else {
-    // Toggle; ensure it's there if its not
-    if (not server.AllLocationsHaveMember(&server.selectedLocations, member)) {
-      foreach loc in server.selectedLocations {
-        presenter = (server.terrainController.tilePresenters.get(loc)).get();
-        // Add it if its not already there
-        if (not server.LocationHasMember(loc, member)) {
-          presenter!.AddMember(member);
-        }
-      }
+func UpdateLookPanelView(server &!EditorInstance) {
+  maybeLocation = server.terrainController.GetMaybeMouseHighlightLocation();
+  if &maybeLocation != &server.maybeLookedLocation {
+    set server.maybeLookedLocation = maybeLocation.clone();
+    if maybeLocation.isEmpty() {
+      server.lookPanelView!.SetStuff(false, "", "", List<(InitialSymbol, str)>());
     } else {
-      foreach loc in server.selectedLocations {
-        presenter = (server.terrainController.tilePresenters.get(loc)).get();
-        // Remove all of them that are present
-        while (server.LocationHasMember(loc, member)) {
-          presenter!.RemoveMember(member);
+      location = maybeLocation.get();
+      message = "(" + location.group_x + ", " + location.group_y + ", " + location.index_in_group + ")";
+
+      symbolsAndDescriptions = List<(InitialSymbol, str)>();
+      if server.terrainController.terrain.tiles.ContainsKey(location) {
+        set message = message + " elevation " + server.terrainController.terrain.tiles.get(location).get().elevation;
+        foreach member in server.terrainController.terrain.tiles.get(location).get().members {
+          symbol =
+              InitialSymbol(
+                  InitialSymbolGlyph(
+                      SymbolId("AthSymbols", 114),
+                      ConstantVec4iAnimation(Vec4i(255, 255, 255, 255))),
+                  Some(
+                      InitialSymbolOutline(
+                          OuterOutline(),
+                          ConstantVec4iAnimation(Vec4i(0, 0, 0, 0)))),
+                  None<InitialSymbolSides>(),
+                  180,
+                  100);
+          symbolsAndDescriptions!.add((symbol, member));
         }
       }
+
+      server.lookPanelView!.SetStuff(true, message, "", symbolsAndDescriptions);
     }
   }
 }
 
-
-func AllLocationsHaveMember(
-    server &EditorInstance,
-    locations &HashSet<Location, LocationHasher, LocationEquator>,
-    member str)
-bool {
-  foreach location in locations {
-    if not server.LocationHasMember(location, member) {
-      ret false;
-    }
-  }
-  ret true;
-}
-
-func LocationHasMember(
-    server &EditorInstance,
-    location Location,
-    member str)
-bool {
-  foreach hayMember in server.terrainController.terrain.tiles.get(location).get().members {
-    if member == hayMember {
-      ret true;
-    }
-  }
-  ret false;
-}
 
 
 // TODO:
 // - put the panic back in in MemberToViewMapper, we were hitting constraint violations,
 //   need to be able to unlet some locals for it.
 exported func main() {
-  if numMainArgs() < 2 {
-    panic("Supply resources path!");
+  if numMainArgs() < 1 {
+    panic("Usage: atharia vivimap.json");
   }
   resourcesPath = getMainArg(1);
   runServer(&EditorServer(resourcesPath, None<EditorInstance>()));

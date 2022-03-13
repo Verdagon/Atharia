@@ -23,36 +23,40 @@ Result<(), str> {
   
   println("Got key down: " + c);
 
-  if c == 27 {
-    println("Got escape!");
-  } else if c == 61 { // = and + and -2
-    foreach loc in server.selectedLocations {
-      presenter = (server.terrainController.tilePresenters.get(loc)).get();
-      oldElevation = server.terrainController.terrain.tiles.get(loc).get().elevation;
-      presenter!.SetElevation(oldElevation + 1);
-    }
-    //Save();
-    //UpdateLookPanelView();
-  } else if c == 45 { // - and _ and -1
-    foreach loc in server.selectedLocations {
-      presenter = (server.terrainController.tilePresenters.get(loc)).get();
-      oldElevation = server.terrainController.terrain.tiles.get(loc).get().elevation;
-      newElevation = max(1, oldElevation - 1);
-      presenter!.SetElevation(newElevation);
-    }
-    //Save();
-    //UpdateLookPanelView();
-  }
-  keyCodeToMemberMap = makeKeyCodeToMemberMap();
-  foreach [keyCode, member] in keyCodeToMemberMap {
-    if c == keyCode.toAscii() {
-      addKeyDown = rightAltDown;
-      removeKeyDown = leftAltDown;
-      server!.ChangeMember(member, addKeyDown, removeKeyDown);
-      //Save();
-    }
-    //UpdateLookPanelView();
-  }
+  //if c == 27 {
+  //  newSelection =
+  //      server.selectedLocations.HashSet<Location, LocationHasher, LocationEquator>(
+  //          LocationHasher(), LocationEquator());
+  //  server!.SetSelection(newSelection);
+  //  server!.UpdateLookPanelView();
+  //} else if c == 61 { // = and + and -2
+  //  foreach loc in server.selectedLocations {
+  //    presenter = (server.terrainController.tilePresenters.get(loc)).get();
+  //    oldElevation = server.terrainController.terrain.tiles.get(loc).get().elevation;
+  //    presenter!.SetElevation(oldElevation + 1);
+  //  }
+  //  Save(server);
+  //  server!.UpdateLookPanelView();
+  //} else if c == 45 { // - and _ and -1
+  //  foreach loc in server.selectedLocations {
+  //    presenter = (server.terrainController.tilePresenters.get(loc)).get();
+  //    oldElevation = server.terrainController.terrain.tiles.get(loc).get().elevation;
+  //    newElevation = max(1, oldElevation - 1);
+  //    presenter!.SetElevation(newElevation);
+  //  }
+  //  Save(server);
+  //  server!.UpdateLookPanelView();
+  //}
+  //keyCodeToMemberMap = makeKeyCodeToMemberMap();
+  //foreach [keyCode, member] in keyCodeToMemberMap {
+  //  if c == keyCode.toAscii() {
+  //    addKeyDown = rightAltDown;
+  //    removeKeyDown = leftAltDown;
+  //    server!.ChangeMember(member, addKeyDown, removeKeyDown);
+  //    Save(server);
+  //  }
+  //  server!.UpdateLookPanelView();
+  //}
 
   ret Ok<(), str>(());
 
@@ -92,16 +96,6 @@ Result<(), str> {
   //      domino.RemoveView(panelId);
   //    };
   //    break;
-  //  case '-':
-  //  case '_':
-  //  case -1:
-  //    foreach (var loc in selectedLocations) {
-  //      terrainPresenter.GetTilePresenter(loc).SetElevation(
-  //          Math.Max(1, terrainPresenter.terrain.tiles[loc].elevation - 1));
-  //    }
-  //    Save();
-  //    UpdateLookPanelView();
-  //    break;
   //  case '\u007F':
   //    foreach (var loc in new SortedSet<Location>(selectedLocations)) {
   //      selectedLocations.Remove(loc);
@@ -110,7 +104,7 @@ Result<(), str> {
   //      tile.Destruct();
   //    }
   //    Save();
-  //    UpdateLookPanelView();
+  //    server!.UpdateLookPanelView();
   //    break;
   //}
 }

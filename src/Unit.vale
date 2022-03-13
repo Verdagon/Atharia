@@ -1,0 +1,6 @@
+
+struct Unit {
+  id int; // maybe we wont need this someday?
+  location! Location;
+  elevation! int;
+}

@@ -13,8 +13,27 @@ Result<EditorInstance, str> {
 
   pattern = make_pentagon_9_pattern();
 
+  rand = XS32Rand(1337i64);
+
+  terrain = PatternMap<TerrainTile>(make_pentagon_9_pattern());
+  unoccupiedWalkableLocs = HashSet<Location>(LocationHasher(), LocationEquator());
+  bool_map = MakeMap(&!rand);
+  foreach [loc, walkable] in bool_map.tiles {
+    if walkable {
+      terrain.tiles!.add(loc, TerrainTile(loc, 2, walkable));
+      unoccupiedWalkableLocs!.add(loc);
+    } else {
+      terrain.tiles!.add(loc, TerrainTile(loc, 1, walkable))
+    }
+  }
+
+  playerLoc =
+      unoccupiedWalkableLocs
+      .GetRandomElement(TruncateI64ToI32(rand!.Next()))
+      .get("No eligible player loc?");
+
   cameraLookAtPosition =
-      pattern.getTileCenter(Location(0, 0, 0)).Vec3i(0); //terrain.GetTileCenter(startLocation);
+      pattern.GetTileCenter(playerLoc).Vec3i(0); //terrain.GetTileCenter(startLocation);
   lookatOffsetToCamera = Vec3i(0, 5000, -10000);
 
   domino!.SetupGame(
@@ -23,30 +42,50 @@ Result<EditorInstance, str> {
       200,
       pattern);
 
-  terrain =
-    Terrain(
-      make_pentagon_9_pattern(),
-      200,
-      HashMap<Location, TerrainTile, LocationHasher, LocationEquator>(
-        LocationHasher(), LocationEquator()));
-  terrain.tiles!.add(
-    Location(0, 0, 0),
-    TerrainTile(
-      Location(0, 0, 0),
-      6,
-      List<str>()));
-
-
   vivimap = MemberToViewMapperLoadMap(resourcesPath, "vivimap.json");
 
-  terrain_controller = TerrainController(&!domino, &vivimap, terrain);
+  membersView = ListView(&!domino, 0, 6, 40, 16);
+  lookPanelView = LookPanelView(&!domino, start_request.screen_gw, -1, 2);
+
+  terrain_controller = TerrainController(&!domino, &vivimap, terrain, 200);
+
+  borrow_domino = &!domino;
   instance =
-    EditorInstance(
-      domino,
-      vivimap,
-      terrain_controller,
-      HashSet<Location, LocationHasher, LocationEquator>(
-        LocationHasher(), LocationEquator()));
+      EditorInstance(
+          domino,
+          vivimap,
+          None<Location>(),
+          membersView,
+          lookPanelView,
+          lookatOffsetToCamera,
+          terrain_controller,
+          HashMap<int, Unit, IntHasher, IntEquator>(IntHasher(), IntEquator()),
+          HashMap<int, UnitPresenter, IntHasher, IntEquator>(IntHasher(), IntEquator()),
+          HashMap<Location, &!Unit, LocationHasher, LocationEquator>(LocationHasher(), LocationEquator()),
+          unoccupiedWalkableLocs,
+          None<&!Unit>());
+
+  playerElevation = instance.terrainController.terrain.tiles.get(playerLoc).get().elevation;
+  player = Unit(100, playerLoc, playerElevation);
+  instance.locToUnit!.add(player.location, &!player);
+  instance.unoccupiedWalkableLocs!.remove(player.location);
+  borrow_player = &!player;
+  instance.units!.add(player.id, player);
+  instance.unitPresenters!.add(borrow_player.id, UnitPresenter(&!borrow_domino, &!borrow_player));
+
+  set instance.player = Some(borrow_player);
+
+  foreach i in range(0, 10) {
+    enemyLoc = instance.unoccupiedWalkableLocs.GetRandomElement(TruncateI64ToI32(rand!.Next())).get("No eligible enemy loc?");
+    vassert(not instance.locToUnit.ContainsKey(enemyLoc), "Already unit there?");
+    enemyElevation = instance.terrainController.terrain.tiles.get(enemyLoc).get().elevation;
+    enemy = Unit(101 + i, enemyLoc, 2);
+    instance.locToUnit!.add(enemy.location, &!enemy);
+    instance.unoccupiedWalkableLocs!.remove(enemy.location);
+    borrow_enemy = &!enemy;
+    instance.units!.add(enemy.id, enemy);
+    instance.unitPresenters!.add(borrow_enemy.id, UnitPresenter(&!borrow_domino, &!borrow_enemy));
+  }
 
   ret Ok<EditorInstance, str>(instance);
 }
