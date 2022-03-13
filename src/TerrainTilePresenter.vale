@@ -1,4 +1,5 @@
 
+
 struct TerrainTilePresenter {
   domino &!GameToDominoConnection;
   terrainTile &!TerrainTile;
@@ -9,8 +10,30 @@ struct TerrainTilePresenter {
   highlighted! bool;
 }
 
-func GrassSurfaceColor() ConstantVec4iAnimation { ConstantVec4iAnimation(Vec4i(0, 75, 0, 100)) }
-func GrassSideColor() ConstantVec4iAnimation { ConstantVec4iAnimation(Vec4i(0, 50, 0, 100)) }
+func ComposeComponent(initialTile &!InitialTile, self &DecorationComponent) {
+  if self.name == "rocks" {
+    set initialTile.topColor = ConstantVec4iAnimation(Vec4i(30, 30, 30, 255));
+    set initialTile.sideColor = ConstantVec4iAnimation(Vec4i(20, 20, 20, 255));
+    set initialTile.maybeOverlaySymbol =
+        Some(
+              InitialSymbol(
+                  InitialSymbolGlyph(
+                      SymbolId("AthSymbols", 102),
+                      ConstantVec4iAnimation(Vec4i(128, 128, 128, 50))),
+                  Some(
+                      InitialSymbolOutline(
+                          OuterOutline(),
+                          ConstantVec4iAnimation(Vec4i(0, 0, 0, 255)))),
+                  None<InitialSymbolSides>(),
+                  0,
+                  100));
+  } else if self.name == "grass" {
+    set initialTile.topColor = ConstantVec4iAnimation(Vec4i(0, 75, 0, 255));
+    set initialTile.sideColor = ConstantVec4iAnimation(Vec4i(0, 50, 0, 255));
+  } else {
+    println("Unknown decoration component: {self.name}");
+  }
+}
 
 func TerrainTilePresenter(
   domino &!GameToDominoConnection,
@@ -22,24 +45,17 @@ TerrainTilePresenter {
 
   highlighted = false;
 
-  initialTileDescription =
-      InitialTile(
-          location,
-          terrainTile.elevation,
-          CalculateTintedFrontColor(&GrassSurfaceColor(), highlighted),
-          GrassSideColor(),
-          None<InitialSymbol>(),
-          None<InitialSymbol>(),
-          List<(i64, InitialSymbol)>());
-  tileViewId = domino!.CreateTile(initialTileDescription);
+  description = MakeTileDescription(location, &terrainTile, highlighted);
+
+  tileViewId = domino!.CreateTile(description);
 
   self =
-    TerrainTilePresenter(
-      domino,
-      terrainTile,
-      location,
-      tileViewId,
-      highlighted);
+      TerrainTilePresenter(
+          domino,
+          terrainTile,
+          location,
+          tileViewId,
+          highlighted);
 
   ret self;
 }
@@ -58,8 +74,8 @@ func SetHighlighted(self &!TerrainTilePresenter, highlighted bool) {
 
 func RefreshSurfaceColor(self &!TerrainTilePresenter) {
   self.domino!.SetSurfaceColor(
-      self.tileViewId, 
-      CalculateTintedFrontColor(&GrassSurfaceColor(), self.highlighted));
+      self.tileViewId,
+      MakeTileDescription(self.location, &self.terrainTile, self.highlighted).topColor.clone());
 }
 
 func RefreshSideColor(self &!TerrainTilePresenter) {
@@ -109,19 +125,34 @@ func SetElevation(self &!TerrainTilePresenter, elevation int) {
 //  ret Some(membersFeatures.get(membersFeatures.len() - 1).1.clone());
 //}
 
-func CalculateTintedFrontColor(
-    membersFrontColor &Vec4iAnimation,
-    highlighted bool)
-Vec4iAnimation {
-  if (highlighted) {
+func MakeTileDescription(loc Location, terrainTile &TerrainTile, highlighted bool) InitialTile {
+  description =
+      InitialTile(
+          loc,
+          terrainTile.elevation,
+          ConstantVec4iAnimation(Vec4i(255, 0, 255, 255)),
+          ConstantVec4iAnimation(Vec4i(255, 0, 255, 255)),
+          None<InitialSymbol>(),
+          None<InitialSymbol>(),
+          List<(i64, InitialSymbol)>());
+  foreach component in terrainTile.components {
+    ComposeComponent(&!description, component);
+  }
+  set description.topColor =
+      MaybeTintTopColor(description.topColor.clone(), highlighted);
+  ret description;
+}
+
+func MaybeTintTopColor(existingColor Vec4iAnimation, highlighted bool) Vec4iAnimation {
+  if highlighted {
     ret DivideVec4iAnimation(
         AddVec4iAnimation(
             MultiplyVec4iAnimation(
-                membersFrontColor.clone(), ConstantVec4iAnimationAll(87)),
+                existingColor, ConstantVec4iAnimationAll(87)),
             MultiplyVec4iAnimation(
                 ConstantVec4iAnimationWhite(), ConstantVec4iAnimationAll(13))),
         ConstantVec4iAnimationAll(100));
   } else {
-    ret membersFrontColor.clone();
+    ret existingColor;
   }
 }

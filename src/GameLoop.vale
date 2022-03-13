@@ -1,0 +1,78 @@
+
+
+func GameLoop(server &!EditorInstance) {
+  remainingIterations = server.unitPresenters.len() * 3 + 100;
+
+  while
+      maybeNextActingUnit = FindNextActingUnit(server);
+      not maybeNextActingUnit.isEmpty() {
+    if remainingIterations == 0 {
+      println("Hit the maximum number of iterations, exiting!");
+      break;
+    }
+    set remainingIterations = remainingIterations - 1;
+
+    nextActingUnit = (maybeNextActingUnit).get();
+    println("Found next acting unit: {nextActingUnit.id}");
+    if nextActingUnit.id == server.player.get().id {
+      player = nextActingUnit;
+      if not player.maybeDestination.isEmpty() {
+        destination = player.maybeDestination.get();
+
+        path =
+            Go(
+                &server.terrainController.terrain.pattern,
+                player.location,
+                destination,
+                true,
+                (a, b, distanceSoFar) => {
+                  server.unoccupiedWalkableLocs.contains(b) and
+                  server.terrainController.terrain.pattern.IsAdjacent(a, b, false)
+                });
+        if path.len() > 0 {
+          nextStepLoc = path.get(0);
+          nextStepElevation =
+              server.terrainController.terrain.tiles.get(nextStepLoc).get().elevation;
+          player!.HopTo(server, nextStepLoc, nextStepElevation);
+          set server.gameTime = player.nextActionTime;
+
+          [x, y] = server.terrainController.terrain.pattern.GetTileCenter(nextStepLoc);
+          z = nextStepElevation * server.terrainController.elevationStepHeight;
+          pos = Vec3i(x, y, z);
+          server.domino!.MoveCamera(pos, server.lookatOffsetToCamera, 1000);
+
+          if nextStepLoc == destination {
+            set player.maybeDestination = None<Location>();
+          }
+        } else {
+          // Blocked
+          set player.maybeDestination = None<Location>();
+        }
+      } else {
+        // No destination, and its players turn, so stop and wait for input.
+        break;
+      }
+    } else {
+      nextActingUnit!.Act(server);
+    }
+  }
+}
+
+func FindNextActingUnit(server &!EditorInstance) Opt<&!Unit> {
+  maybeNextActingUnit Opt<&!Unit> = None<&!Unit>();
+
+  foreach [id, unitPresenter] in &!server.unitPresenters {
+    if maybeNextActingUnit.isEmpty() {
+      set maybeNextActingUnit = Some(unitPresenter.unit);
+    } else {
+      nextActingUnit = maybeNextActingUnit!.get();
+      if unitPresenter.unit.nextActionTime <= server.gameTime {
+        if unitPresenter.unit.nextActionTime < nextActingUnit.nextActionTime {
+          set maybeNextActingUnit = Some(unitPresenter.unit);
+        }
+      }
+    }
+  }
+
+  ret maybeNextActingUnit;
+}

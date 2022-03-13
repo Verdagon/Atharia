@@ -3,4 +3,10 @@ struct TerrainTile {
   location Location;
   elevation! int;
   walkable bool;
+  components List<DecorationComponent>;
+}
+
+
+struct DecorationComponent {
+  name str;
 }

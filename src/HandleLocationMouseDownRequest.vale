@@ -15,25 +15,14 @@ Result<(), str> {
 
 
   if server.terrainController.tilePresenters.ContainsKey(location) {
-    tilePresenter = server.terrainController.tilePresenters.get(location).get();
-    elevation = tilePresenter.terrainTile.elevation;
-
     if not server.unoccupiedWalkableLocs.contains(location) {
       ret Ok<(), str>(());
     }
-    (&!server.unitPresenters!.get(server.player.get().id)!.get())
-        .HopTo(server, location, elevation);
 
-    [x, y] = server.terrainController.terrain.pattern.GetTileCenter(location);
-    z = elevation * server.terrainController.elevationStepHeight;
-    pos = Vec3i(x, y, z);
-    domino!.MoveCamera(pos, server.lookatOffsetToCamera, 1000);
+    tilePresenter = server.terrainController.tilePresenters.get(location).get();
+    (&!server.player!.get()).SetDestination(location);
 
-    foreach [id, unitPresenter] in &!server.unitPresenters {
-      if unitPresenter.unit.id != server.player.get().id {
-        unitPresenter!.Act(server);
-      }
-    }
+    GameLoop(server);
   } else {
     println("Invalid click location: {location}");
   }

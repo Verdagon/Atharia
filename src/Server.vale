@@ -32,6 +32,7 @@ struct EditorInstance {
   locToUnit HashMap<Location, &!Unit, LocationHasher, LocationEquator>;
   unoccupiedWalkableLocs HashSet<Location, LocationHasher, LocationEquator>;
   player! Opt<&!Unit>;
+  gameTime! i64;
 }
 
 func HandleEvent(

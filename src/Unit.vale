@@ -3,4 +3,98 @@ struct Unit {
   id int; // maybe we wont need this someday?
   location! Location;
   elevation! int;
+
+  isPlayer bool; // replace with components
+
+  maybeDestination! Opt<Location>;
+  nextActionTime! i64;
+}
+
+func SetDestination(self &!Unit, destination Location) {
+  set self.maybeDestination = Some(destination);
+}
+
+func HopTo(self &!Unit, server &!EditorInstance, newLoc Location, newElevation int) {
+  //if server.locToUnit.ContainsKey(self.location) {
+    //println("locToUnit.remove {self.location}");
+    server.locToUnit!.remove(self.location);
+  //} else {
+  ////  println("locToUnit.contains {self.location} was false!");
+  //}
+  //println("unoccupiedWalkableLocs.add {self.location}");
+  server.unoccupiedWalkableLocs!.add(self.location);
+  set self.location = newLoc;
+  set self.elevation = newElevation;
+  set self.nextActionTime = self.nextActionTime + 600i64;
+  (&!server.unitPresenters!.get(self.id)!.get()).OnUnitHop(server, newLoc, newElevation);
+  //if server.unoccupiedWalkableLocs.contains(self.location) {
+    //println("unoccupiedWalkableLocs.remove {self.location}");
+    server.unoccupiedWalkableLocs!.remove(self.location);
+  //} else {
+  ////  println("unoccupiedWalkableLocs.contains {self.location} was false!");
+  //}
+  //println("locToUnit.add {self.location}");
+  server.locToUnit!.add(self.location, self);
+}
+
+func Act(self &!Unit, server &!EditorInstance) {
+  println("unit {self.id} acting!");
+
+  path =
+      Go(
+          &server.terrainController.terrain.pattern,
+          self.location,
+          server.player.get().location,
+          true,
+          (a, b, distanceSoFar) => {
+            if distanceSoFar > 10000 {
+              ret false;
+            }
+            server.terrainController.terrain.pattern.IsAdjacent(a, b, false) and
+            server.terrainController.terrain.tiles.ContainsKey(b) and
+            server.terrainController.terrain.tiles.get(b).get().walkable
+          });
+  maybeNextStepLoc Opt<Location> =
+    if path.len() > 0 {
+      if server.unoccupiedWalkableLocs.contains(path.get(0)) {
+        x Opt<Location> = Some(path.get(0));
+        x
+      } else {
+        // We might get here if the next step contains another unit.
+        // do nothing
+        x Opt<Location> = None<Location>();
+        x
+      }
+    } else {
+      adjacents =
+          server.terrainController.terrain.GetAdjacentExistingLocations(
+              self.location, false);
+      possibleWanderLocs = List<Location>();
+      foreach adjacent in adjacents {
+        if server.unoccupiedWalkableLocs.contains(adjacent) {
+          possibleWanderLocs!.add(adjacent);
+        }
+      }
+      if possibleWanderLocs.len() == 0 {
+        // do nothing
+        x Opt<Location> = None<Location>();
+        x
+      } else {
+        index = abs(TruncateI64ToI32(server.rand!.Next())) mod possibleWanderLocs.len();
+        wanderLoc = possibleWanderLocs.get(index);
+        x Opt<Location> = Some(wanderLoc);
+        x
+      }
+    };
+
+  if not maybeNextStepLoc.isEmpty() {
+    nextStepLoc = maybeNextStepLoc.get();
+
+    nextStepElevation =
+        server.terrainController.terrain.tiles.get(nextStepLoc).get().elevation;
+
+    self!.HopTo(server, nextStepLoc, nextStepElevation);
+  } else {
+    set self.nextActionTime = self.nextActionTime + 600i64;
+  }
 }

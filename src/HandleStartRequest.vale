@@ -13,19 +13,23 @@ Result<EditorInstance, str> {
 
   pattern = make_pentagon_9_pattern();
 
-  rand = XS32Rand(1337i64);
+  rand = XS32Rand(331460i64);
 
   terrain = PatternMap<TerrainTile>(make_pentagon_9_pattern());
   unoccupiedWalkableLocs = HashSet<Location>(LocationHasher(), LocationEquator());
   bool_map = MakeMap(&!rand);
   foreach [loc, walkable] in bool_map.tiles {
     if walkable {
-      terrain.tiles!.add(loc, TerrainTile(loc, 2, walkable));
-      println("unoccupiedWalkableLocs.add {loc}");
+      terrain.tiles!.add(
+          loc,
+          TerrainTile(loc, 1, walkable, List([#][DecorationComponent("grass")])));
+      //println("unoccupiedWalkableLocs.add {loc}");
       unoccupiedWalkableLocs!.add(loc);
     } else {
-      println("unoccupiedWalkableLocs.add {loc}");
-      terrain.tiles!.add(loc, TerrainTile(loc, 1, walkable))
+      //println("unoccupiedWalkableLocs.add {loc}");
+      terrain.tiles!.add(
+          loc,
+          TerrainTile(loc, 1, walkable, List([#][DecorationComponent("rocks")])));
     }
   }
 
@@ -67,14 +71,15 @@ Result<EditorInstance, str> {
           HashMap<int, UnitPresenter, IntHasher, IntEquator>(IntHasher(), IntEquator()),
           HashMap<Location, &!Unit, LocationHasher, LocationEquator>(LocationHasher(), LocationEquator()),
           unoccupiedWalkableLocs,
-          None<&!Unit>());
+          None<&!Unit>(),
+          0i64);
 
-  println("setting up player");
+  //println("setting up player");
   playerElevation = instance.terrainController.terrain.tiles.get(playerLoc).get().elevation;
-  player = Unit(100, playerLoc, playerElevation);
-  println("locToUnit.add {player.location}");
+  player = Unit(100, playerLoc, playerElevation, true, None<Location>(), 0i64);
+  //println("locToUnit.add {player.location}");
   instance.locToUnit!.add(player.location, &!player);
-  println("unoccupiedWalkableLocs.remove {player.location}");
+  //println("unoccupiedWalkableLocs.remove {player.location}");
   instance.unoccupiedWalkableLocs!.remove(player.location);
   borrow_player = &!player;
   instance.units!.add(player.id, player);
@@ -82,15 +87,15 @@ Result<EditorInstance, str> {
 
   set instance.player = Some(borrow_player);
 
-  println("setting up enemies");
+  //println("setting up enemies");
   foreach i in range(0, 10) {
     enemyLoc = instance.unoccupiedWalkableLocs.GetRandomElement(TruncateI64ToI32(borrow_rand!.Next())).get("No eligible enemy loc?");
     vassert(not instance.locToUnit.ContainsKey(enemyLoc), "Already unit there?");
     enemyElevation = instance.terrainController.terrain.tiles.get(enemyLoc).get().elevation;
-    enemy = Unit(101 + i, enemyLoc, 2);
-    println("locToUnit.add {enemy.location}");
+    enemy = Unit(101 + i, enemyLoc, 2, false, None<Location>(), 1i64);
+    //println("locToUnit.add {enemy.location}");
     instance.locToUnit!.add(enemy.location, &!enemy);
-    println("unoccupiedWalkableLocs.remove {enemy.location}");
+    //println("unoccupiedWalkableLocs.remove {enemy.location}");
     instance.unoccupiedWalkableLocs!.remove(enemy.location);
     borrow_enemy = &!enemy;
     instance.units!.add(enemy.id, enemy);
