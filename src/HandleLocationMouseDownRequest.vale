@@ -24,6 +24,12 @@ Result<(), str> {
     z = elevation * server.terrainController.elevationStepHeight;
     pos = Vec3i(x, y, z);
     domino!.MoveCamera(pos, server.lookatOffsetToCamera, 1000);
+
+    foreach [_, unitPresenter] in &!server.unitPresenters {
+      //if unitPresenter.unit.id != server.player.get().id {
+      //  unitPresenter!.Act(server);
+      //}
+    }
   } else {
     println("Invalid click location: {location}");
   }

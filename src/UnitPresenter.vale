@@ -50,3 +50,14 @@ func HopTo(self &!UnitPresenter, newLoc Location, newElevation int) {
   set self.unit.elevation = newElevation;
   self.domino!.UnitHopTo(self.unitViewId, newLoc, newElevation);
 }
+
+func Act(self &!UnitPresenter, server &!EditorInstance) {
+  path = List<Location>();
+  if path.len() == 0 {
+    // do nothing
+    ret void();
+  }
+  nextStepLoc = path.get(0);
+  nextStepElevation = server.terrainController.terrain.tiles.get(nextStepLoc).get().elevation;
+  self!.HopTo(nextStepLoc, nextStepElevation);
+}

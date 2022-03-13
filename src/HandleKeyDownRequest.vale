@@ -108,28 +108,3 @@ Result<(), str> {
   //    break;
   //}
 }
-
-func makeKeyCodeToMemberMap() HashMap<str, str, StrHasher, StrEquator> {
-  map = HashMap<str, str, StrHasher, StrEquator>(StrHasher(), StrEquator());
-  map!.add("#", "wall");
-  map!.add("`", "water");
-  map!.add("b", "fire");
-  map!.add("c", "cave");
-  map!.add("d", "dirt");
-  map!.add("f", "floor");
-  map!.add("g", "grass");
-  map!.add("h", "healthPotion");
-  map!.add("l", "magma");
-  map!.add("m", "mud");
-  map!.add("o", "obsidian");
-  map!.add("p", "manaPotion");
-  map!.add("r", "rocks");
-  map!.add("s", "darkRocks");
-  map!.add("t", "tree");
-  map!.add("v", "avelisk");
-  map!.add("w", "caveWall");
-  map!.add("x", "marker");
-  map!.add("y", "zeddy");
-  map!.add("z", "obsidianFloor");
-  ret map;
-}
