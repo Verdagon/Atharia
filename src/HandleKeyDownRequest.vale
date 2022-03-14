@@ -1,13 +1,4 @@
 
-struct KeyDownRequest {
-  unicode int;
-  leftShiftDown bool;
-  rightShiftDown bool;
-  leftAltDown bool;
-  rightAltDown bool;
-  ctrlDown bool;
-}
-
 func HandleKeyDownRequest(
   server &!EditorInstance,
   request &KeyDownRequest)

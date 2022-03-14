@@ -3,6 +3,8 @@
 func GameLoop(server &!EditorInstance) {
   remainingIterations = server.unitPresenters.len() * 3 + 100;
 
+  dyingUnits = List<(Unit, UnitPresenter)>();
+
   while
       maybeNextActingUnit = FindNextActingUnit(server);
       not maybeNextActingUnit.isEmpty() {
@@ -13,48 +15,25 @@ func GameLoop(server &!EditorInstance) {
     set remainingIterations = remainingIterations - 1;
 
     nextActingUnit = (maybeNextActingUnit).get();
-    println("Found next acting unit: {nextActingUnit.id}");
-    if nextActingUnit.id == server.player.get().id {
-      player = nextActingUnit;
-      if not player.maybeDestination.isEmpty() {
-        destination = player.maybeDestination.get();
-
-        path =
-            Go(
-                &server.terrainController.terrain.pattern,
-                player.location,
-                destination,
-                true,
-                (a, b, distanceSoFar) => {
-                  server.unoccupiedWalkableLocs.contains(b) and
-                  server.terrainController.terrain.pattern.IsAdjacent(a, b, false)
-                });
-        if path.len() > 0 {
-          nextStepLoc = path.get(0);
-          nextStepElevation =
-              server.terrainController.terrain.tiles.get(nextStepLoc).get().elevation;
-          player!.HopTo(server, nextStepLoc, nextStepElevation);
-          set server.gameTime = player.nextActionTime;
-
-          [x, y] = server.terrainController.terrain.pattern.GetTileCenter(nextStepLoc);
-          z = nextStepElevation * server.terrainController.elevationStepHeight;
-          pos = Vec3i(x, y, z);
-          server.domino!.MoveCamera(pos, server.lookatOffsetToCamera, 1000);
-
-          if nextStepLoc == destination {
-            set player.maybeDestination = None<Location>();
-          }
-        } else {
-          // Blocked
-          set player.maybeDestination = None<Location>();
-        }
-      } else {
-        // No destination, and its players turn, so stop and wait for input.
-        break;
-      }
+    println("At {server.gameTime} found next acting unit: {nextActingUnit.id} at {nextActingUnit.nextActionTime}");
+    if nextActingUnit.hp <= 0 {
+      println("Unit dying: {nextActingUnit.id}");
+      dyingUnits!.add((
+          server.units!.remove(nextActingUnit.id),
+          server.unitPresenters!.remove(nextActingUnit.id)));
+    } else if nextActingUnit.id == server.player.get().id {
+      // We will move the player either on their input or on the Timer request.
+      break;
     } else {
       nextActingUnit!.Act(server);
     }
+  }
+
+  while dyingUnits.len() > 0 {
+    [unit, presenter] = dyingUnits.get(dyingUnits.len() - 1);
+    println("Killing unit: {unit.id}");
+    presenter;
+    unit;
   }
 }
 
@@ -62,17 +41,53 @@ func FindNextActingUnit(server &!EditorInstance) Opt<&!Unit> {
   maybeNextActingUnit Opt<&!Unit> = None<&!Unit>();
 
   foreach [id, unitPresenter] in &!server.unitPresenters {
-    if maybeNextActingUnit.isEmpty() {
-      set maybeNextActingUnit = Some(unitPresenter.unit);
-    } else {
-      nextActingUnit = maybeNextActingUnit!.get();
-      if unitPresenter.unit.nextActionTime <= server.gameTime {
-        if unitPresenter.unit.nextActionTime < nextActingUnit.nextActionTime {
-          set maybeNextActingUnit = Some(unitPresenter.unit);
-        }
+    if unitPresenter.unit.nextActionTime <= server.gameTime {
+      if maybeNextActingUnit.isEmpty() or
+          unitPresenter.unit.nextActionTime < maybeNextActingUnit!.get().nextActionTime {
+        set maybeNextActingUnit = Some(unitPresenter.unit);
       }
     }
   }
 
   ret maybeNextActingUnit;
+}
+
+func ProceedPlayer(server &!EditorInstance) {
+  player = &!server.player!.get();
+  println("Proceeding player! game time {server.gameTime} player enxt action time {player.nextActionTime}");
+
+  destination = player.maybeDestination.get("Can't proceed, no destination!");
+
+  path =
+      Go(
+          &server.terrainController.terrain.pattern,
+          player.location,
+          destination,
+          true,
+          (a, b, distanceSoFar) => {
+            server.unoccupiedWalkableLocs.contains(b) and
+            server.terrainController.terrain.pattern.IsAdjacent(a, b, false)
+          });
+  if path.len() > 0 {
+    nextStepLoc = path.get(0);
+    println("There is indeed a path to {destination}, length {path.len()} next step {nextStepLoc}");
+    nextStepElevation =
+        server.terrainController.terrain.tiles.get(nextStepLoc).get().elevation;
+    player!.HopTo(server, nextStepLoc, nextStepElevation);
+    println("Setting game time from {server.gameTime} to {player.nextActionTime}");
+    set server.gameTime = player.nextActionTime;
+
+    [x, y] = server.terrainController.terrain.pattern.GetTileCenter(nextStepLoc);
+    z = nextStepElevation * server.terrainController.elevationStepHeight;
+    pos = Vec3i(x, y, z);
+    server.domino!.MoveCamera(pos, server.lookatOffsetToCamera, 1000);
+
+    if nextStepLoc == destination {
+      println("Player reached destination, stopping!");
+      set player.maybeDestination = None<Location>();
+    }
+  } else {
+    println("No path to {destination}, stopping!");
+    set player.maybeDestination = None<Location>();
+  }
 }

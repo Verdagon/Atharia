@@ -1,9 +1,4 @@
 
-struct SetHoveredLocationRequest {
-  tile_id int;
-  location Opt<Location>;
-}
-
 func HandleSetHoveredLocationRequest(
   server &!EditorInstance,
   request &SetHoveredLocationRequest)

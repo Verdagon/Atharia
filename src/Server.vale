@@ -33,6 +33,7 @@ struct EditorInstance {
   unoccupiedWalkableLocs HashSet<Location, LocationHasher, LocationEquator>;
   player! Opt<&!Unit>;
   gameTime! i64;
+  animationsEndTimeFromNow! int;
 }
 
 func HandleEvent(
@@ -81,6 +82,17 @@ Result<JsonNode, str> {
     if maybe_result.is_err() {
       ret Err<JsonNode, str>((maybe_result).expect_err());
     }
+  } else if event_type_str == "TimerElapsed" {
+    maybe_request = ParseTimerElapsedRequest(&node);
+    if maybe_request.is_err() {
+      ret Err<JsonNode, str>(maybe_request.expect_err());
+    }
+    request = (maybe_request).expect();
+
+    maybe_result = HandleTimerElapsedRequest(&!server.instance!.get(), &request);
+    if maybe_result.is_err() {
+      ret Err<JsonNode, str>((maybe_result).expect_err());
+    }
   } else if event_type_str == "KeyDown" {
     maybe_request = ParseKeyDownRequest(&node);
     if maybe_request.is_err() {
@@ -96,6 +108,14 @@ Result<JsonNode, str> {
     ret Err<JsonNode, str>("Unknown request type: " + event_type_str);
   }
 
+  if not server.instance.isEmpty() {
+    instance = server.instance!.get();
+    if instance.animationsEndTimeFromNow > 0 {
+      instance.domino!.Timer(instance.animationsEndTimeFromNow, 0i64);
+    }
+    set instance.animationsEndTimeFromNow = 0;
+  }
+
   commands_json_arr =
     JsonArray(
       if not server.instance.isEmpty() {
@@ -105,6 +125,7 @@ Result<JsonNode, str> {
       });
   response_obj = JsonObject();
   response_obj.fields!.add("commands", commands_json_arr);
+
   ret Ok<JsonNode, str>(response_obj);
 }
 

@@ -1,0 +1,35 @@
+
+func HandleTimerElapsedRequest(
+  server &!EditorInstance,
+  request &TimerElapsedRequest)
+Result<(), str> {
+  domino = &!server.domino;
+
+  println("In HandleTimerElapsedRequest");
+  tag = request.tag;
+
+
+  maybeNextActingUnit = FindNextActingUnit(server);
+  if maybeNextActingUnit.isEmpty() {
+    println("No next acting unit!");
+    ret Ok<(), str>(());
+  }
+  nextActingUnit = maybeNextActingUnit.get();
+  if nextActingUnit.id != server.player.get().id {
+    println("Next acting unit isnt player!");
+    ret Ok<(), str>(());
+  }
+  player = &!server.player!.get();
+
+  if player.maybeDestination.isEmpty() {
+    // Do nothing, wait for input
+    ret Ok<(), str>(());
+  }
+
+  println("Timer elapsed, player dest is {player.maybeDestination.get()}, proceeding player!");
+  server!.ProceedPlayer();
+
+  GameLoop(server);
+
+  ret Ok<(), str>(());
+}

@@ -1,9 +1,4 @@
 
-struct LocationMouseDownRequest {
-  tile_id int;
-  location Location;
-}
-
 func HandleLocationMouseDownRequest(
   server &!EditorInstance,
   request &LocationMouseDownRequest)
@@ -21,6 +16,8 @@ Result<(), str> {
 
     tilePresenter = server.terrainController.tilePresenters.get(location).get();
     (&!server.player!.get()).SetDestination(location);
+    println("Mouse down, set dest to {location}, proceeding player!");
+    server!.ProceedPlayer();
 
     GameLoop(server);
   } else {

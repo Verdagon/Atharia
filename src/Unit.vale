@@ -8,6 +8,9 @@ struct Unit {
 
   maybeDestination! Opt<Location>;
   nextActionTime! i64;
+
+  hp! int;
+  maxHp int;
 }
 
 func SetDestination(self &!Unit, destination Location) {
@@ -15,30 +18,37 @@ func SetDestination(self &!Unit, destination Location) {
 }
 
 func HopTo(self &!Unit, server &!EditorInstance, newLoc Location, newElevation int) {
-  //if server.locToUnit.ContainsKey(self.location) {
-    //println("locToUnit.remove {self.location}");
-    server.locToUnit!.remove(self.location);
-  //} else {
-  ////  println("locToUnit.contains {self.location} was false!");
-  //}
-  //println("unoccupiedWalkableLocs.add {self.location}");
+  server.locToUnit!.remove(self.location);
   server.unoccupiedWalkableLocs!.add(self.location);
   set self.location = newLoc;
   set self.elevation = newElevation;
   set self.nextActionTime = self.nextActionTime + 600i64;
-  (&!server.unitPresenters!.get(self.id)!.get()).OnUnitHop(server, newLoc, newElevation);
-  //if server.unoccupiedWalkableLocs.contains(self.location) {
-    //println("unoccupiedWalkableLocs.remove {self.location}");
-    server.unoccupiedWalkableLocs!.remove(self.location);
-  //} else {
-  ////  println("unoccupiedWalkableLocs.contains {self.location} was false!");
-  //}
-  //println("locToUnit.add {self.location}");
+  (&!server.unitPresenters!.get(self.id)!.get()).OnHop(server, newLoc, newElevation);
+  server.unoccupiedWalkableLocs!.remove(self.location);
   server.locToUnit!.add(self.location, self);
+}
+
+func Attack(self &!Unit, server &!EditorInstance, enemy &!Unit) {
+  set self.nextActionTime = self.nextActionTime + 600i64;
+  (&!server.unitPresenters!.get(self.id)!.get()).OnAttack(server, &enemy);
+  //wasAlive = enemy.hp > 0;
+  set enemy.hp = enemy.hp - 10;
+  //isAlive = enemy.hp > 0;
+  //if wasAlive and not isAlive {
+  //  (&!server.unitPresenters!.get(self.id)!.get()).OnDeath(server);
+  //}
 }
 
 func Act(self &!Unit, server &!EditorInstance) {
   println("unit {self.id} acting!");
+
+  if server.terrainController.terrain.pattern.IsAdjacent(
+      self.location,
+      server.player.get().location,
+      false) {
+    self!.Attack(server, &!server.player!.get());
+    ret void();
+  }
 
   path =
       Go(

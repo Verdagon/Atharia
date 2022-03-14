@@ -35,8 +35,8 @@ UnitPresenter {
                   0,
                   100),
               List<(i64, InitialSymbol)>(),
-              100,
-              100)
+              unit.hp,
+              unit.maxHp)
           } else {
             InitialUnit(
               unit.location,
@@ -63,8 +63,8 @@ UnitPresenter {
                   0,
                   100),
               List<(i64, InitialSymbol)>(),
-              100,
-              100)
+              unit.hp,
+              unit.maxHp)
           });
 
   self = UnitPresenter(domino, unit, unitViewId);
@@ -72,6 +72,20 @@ UnitPresenter {
   ret self;
 }
 
-func OnUnitHop(self &!UnitPresenter, server &!EditorInstance, newLoc Location, newElevation int) {
-  self.domino!.UnitHopTo(self.unitViewId, newLoc, newElevation);
+func OnHop(self &!UnitPresenter, server &!EditorInstance, newLoc Location, newElevation int) {
+  self.domino!.UnitHopTo(self.unitViewId, newLoc, newElevation, 300);
+  set server.animationsEndTimeFromNow =
+      max(server.animationsEndTimeFromNow, 300);
+}
+
+func OnUnitDeath(self UnitPresenter, server &!EditorInstance) {
+  self.domino!.DestroyUnit(self.unitViewId);
+  set server.animationsEndTimeFromNow =
+      max(server.animationsEndTimeFromNow, 500);
+}
+
+func OnAttack(self &!UnitPresenter, server &!EditorInstance, enemy &Unit) {
+  self.domino!.UnitLunge(self.unitViewId, enemy.location, 150);
+  set server.animationsEndTimeFromNow =
+      max(server.animationsEndTimeFromNow, 150);
 }

@@ -1,9 +1,4 @@
 
-struct StartRequest {
-  screen_gw int;
-  screen_gh int;
-}
-
 func HandleStartRequest(
   resourcesPath str,
   start_request &StartRequest)
@@ -23,10 +18,8 @@ Result<EditorInstance, str> {
       terrain.tiles!.add(
           loc,
           TerrainTile(loc, 1, walkable, List([#][DecorationComponent("grass")])));
-      //println("unoccupiedWalkableLocs.add {loc}");
       unoccupiedWalkableLocs!.add(loc);
     } else {
-      //println("unoccupiedWalkableLocs.add {loc}");
       terrain.tiles!.add(
           loc,
           TerrainTile(loc, 1, walkable, List([#][DecorationComponent("rocks")])));
@@ -72,11 +65,12 @@ Result<EditorInstance, str> {
           HashMap<Location, &!Unit, LocationHasher, LocationEquator>(LocationHasher(), LocationEquator()),
           unoccupiedWalkableLocs,
           None<&!Unit>(),
-          0i64);
+          0i64,
+          0);
 
   //println("setting up player");
   playerElevation = instance.terrainController.terrain.tiles.get(playerLoc).get().elevation;
-  player = Unit(100, playerLoc, playerElevation, true, None<Location>(), 0i64);
+  player = Unit(100, playerLoc, playerElevation, true, None<Location>(), 0i64, 30, 30);
   //println("locToUnit.add {player.location}");
   instance.locToUnit!.add(player.location, &!player);
   //println("unoccupiedWalkableLocs.remove {player.location}");
@@ -92,7 +86,7 @@ Result<EditorInstance, str> {
     enemyLoc = instance.unoccupiedWalkableLocs.GetRandomElement(TruncateI64ToI32(borrow_rand!.Next())).get("No eligible enemy loc?");
     vassert(not instance.locToUnit.ContainsKey(enemyLoc), "Already unit there?");
     enemyElevation = instance.terrainController.terrain.tiles.get(enemyLoc).get().elevation;
-    enemy = Unit(101 + i, enemyLoc, 2, false, None<Location>(), 1i64);
+    enemy = Unit(101 + i, enemyLoc, 2, false, None<Location>(), 1i64, 5, 5);
     //println("locToUnit.add {enemy.location}");
     instance.locToUnit!.add(enemy.location, &!enemy);
     //println("unoccupiedWalkableLocs.remove {enemy.location}");
