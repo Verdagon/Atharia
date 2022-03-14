@@ -82,10 +82,15 @@ func OnUnitDeath(self UnitPresenter, server &!EditorInstance) {
   self.domino!.DestroyUnit(self.unitViewId);
   set server.animationsEndTimeFromNow =
       max(server.animationsEndTimeFromNow, 500);
+  // UnitPresenter drops here
 }
 
 func OnAttack(self &!UnitPresenter, server &!EditorInstance, enemy &Unit) {
   self.domino!.UnitLunge(self.unitViewId, enemy.location, 150);
   set server.animationsEndTimeFromNow =
       max(server.animationsEndTimeFromNow, 150);
+}
+
+func OnHpChanged(self &!UnitPresenter, server &!EditorInstance) {
+  self.domino!.UnitHpChanged(self.unitViewId, self.unit.hp);
 }

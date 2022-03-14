@@ -26,17 +26,21 @@ func HopTo(self &!Unit, server &!EditorInstance, newLoc Location, newElevation i
   (&!server.unitPresenters!.get(self.id)!.get()).OnHop(server, newLoc, newElevation);
   server.unoccupiedWalkableLocs!.remove(self.location);
   server.locToUnit!.add(self.location, self);
+
+  if self.isPlayer {
+    set server.gameTime = self.nextActionTime;
+  }
 }
 
 func Attack(self &!Unit, server &!EditorInstance, enemy &!Unit) {
+  set enemy.hp = enemy.hp - 10;
   set self.nextActionTime = self.nextActionTime + 600i64;
   (&!server.unitPresenters!.get(self.id)!.get()).OnAttack(server, &enemy);
-  //wasAlive = enemy.hp > 0;
-  set enemy.hp = enemy.hp - 10;
-  //isAlive = enemy.hp > 0;
-  //if wasAlive and not isAlive {
-  //  (&!server.unitPresenters!.get(self.id)!.get()).OnDeath(server);
-  //}
+  (&!server.unitPresenters!.get(enemy.id)!.get()).OnHpChanged(server);
+
+  if self.isPlayer {
+    set server.gameTime = self.nextActionTime;
+  }
 }
 
 func Act(self &!Unit, server &!EditorInstance) {

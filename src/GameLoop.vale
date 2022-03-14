@@ -17,10 +17,15 @@ func GameLoop(server &!EditorInstance) {
     nextActingUnit = (maybeNextActingUnit).get();
     println("At {server.gameTime} found next acting unit: {nextActingUnit.id} at {nextActingUnit.nextActionTime}");
     if nextActingUnit.hp <= 0 {
-      println("Unit dying: {nextActingUnit.id}");
-      dyingUnits!.add((
-          server.units!.remove(nextActingUnit.id),
-          server.unitPresenters!.remove(nextActingUnit.id)));
+      if nextActingUnit.id == server.player.get().id {
+        server.lookPanelView!.SetStuff(true, "You have died, game over!", "", List<(InitialSymbol, str)>());
+        break;
+      } else {
+        println("Unit dying: {nextActingUnit.id}");
+        dyingUnits!.add((
+            server.units!.remove(nextActingUnit.id),
+            server.unitPresenters!.remove(nextActingUnit.id)));
+      }
     } else if nextActingUnit.id == server.player.get().id {
       // We will move the player either on their input or on the Timer request.
       break;
@@ -29,11 +34,16 @@ func GameLoop(server &!EditorInstance) {
     }
   }
 
-  while dyingUnits.len() > 0 {
-    [unit, presenter] = dyingUnits.get(dyingUnits.len() - 1);
+  drop_into((dyingUnits).toArray(), &!([unit, presenter]) => {
     println("Killing unit: {unit.id}");
-    presenter;
+    server.locToUnit!.remove(unit.location);
+    server.unoccupiedWalkableLocs!.add(unit.location);
+    OnUnitDeath(presenter, server);
     unit;
+  });
+
+  if server.units.len() == 1 {
+    server.lookPanelView!.SetStuff(true, "You have killed all the goblins, victory!", "", List<(InitialSymbol, str)>());
   }
 }
 
@@ -75,7 +85,6 @@ func ProceedPlayer(server &!EditorInstance) {
         server.terrainController.terrain.tiles.get(nextStepLoc).get().elevation;
     player!.HopTo(server, nextStepLoc, nextStepElevation);
     println("Setting game time from {server.gameTime} to {player.nextActionTime}");
-    set server.gameTime = player.nextActionTime;
 
     [x, y] = server.terrainController.terrain.pattern.GetTileCenter(nextStepLoc);
     z = nextStepElevation * server.terrainController.elevationStepHeight;
