@@ -60,7 +60,7 @@ Result<EditorInstance, str> {
           lookPanelView,
           lookatOffsetToCamera,
           terrain_controller,
-          HashMap<int, Unit, IntHasher, IntEquator>(IntHasher(), IntEquator()),
+          HashMap<int, UnitMembership, IntHasher, IntEquator>(IntHasher(), IntEquator()),
           HashMap<int, UnitPresenter, IntHasher, IntEquator>(IntHasher(), IntEquator()),
           HashMap<Location, &!Unit, LocationHasher, LocationEquator>(LocationHasher(), LocationEquator()),
           unoccupiedWalkableLocs,
@@ -68,33 +68,25 @@ Result<EditorInstance, str> {
           0i64,
           0);
 
-  //println("setting up player");
   playerElevation = instance.terrainController.terrain.tiles.get(playerLoc).get().elevation;
-  player = Unit(100, playerLoc, playerElevation, true, None<Location>(), 0i64, 30, 30);
-  //println("locToUnit.add {player.location}");
-  instance.locToUnit!.add(player.location, &!player);
-  //println("unoccupiedWalkableLocs.remove {player.location}");
-  instance.unoccupiedWalkableLocs!.remove(player.location);
-  borrow_player = &!player;
-  instance.units!.add(player.id, player);
-  instance.unitPresenters!.add(borrow_player.id, UnitPresenter(&!borrow_domino, &!borrow_player));
+  player = instance!.addUnit(Unit(100, playerLoc, playerElevation, true, None<Location>(), 0i64, 30, 30));
+  set instance.player = Some(player);
 
-  set instance.player = Some(borrow_player);
-
-  //println("setting up enemies");
   foreach i in range(0, 10) {
     enemyLoc = instance.unoccupiedWalkableLocs.GetRandomElement(TruncateI64ToI32(borrow_rand!.Next())).get("No eligible enemy loc?");
-    vassert(not instance.locToUnit.ContainsKey(enemyLoc), "Already unit there?");
     enemyElevation = instance.terrainController.terrain.tiles.get(enemyLoc).get().elevation;
-    enemy = Unit(101 + i, enemyLoc, 2, false, None<Location>(), 1i64, 5, 5);
-    //println("locToUnit.add {enemy.location}");
-    instance.locToUnit!.add(enemy.location, &!enemy);
-    //println("unoccupiedWalkableLocs.remove {enemy.location}");
-    instance.unoccupiedWalkableLocs!.remove(enemy.location);
-    borrow_enemy = &!enemy;
-    instance.units!.add(enemy.id, enemy);
-    instance.unitPresenters!.add(borrow_enemy.id, UnitPresenter(&!borrow_domino, &!borrow_enemy));
+    instance!.addUnit(Unit(101 + i, enemyLoc, 2, false, None<Location>(), 1i64, 5, 5));
   }
 
   ret Ok<EditorInstance, str>(instance);
+}
+
+func addUnit(instance &!EditorInstance, unit Unit) &!Unit {
+  vassert(not instance.locToUnit.ContainsKey(unit.location), "addUnit: Already unit there?");
+  instance.locToUnit!.add(unit.location, &!unit);
+  instance.unoccupiedWalkableLocs!.remove(unit.location);
+  borrow_unit = &!unit;
+  instance.units!.add(unit.id, UnitMembership(unit));
+  instance.unitPresenters!.add(borrow_unit.id, UnitPresenter(instance.domino, &!borrow_unit));
+  ret borrow_unit;
 }

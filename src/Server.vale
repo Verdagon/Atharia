@@ -11,12 +11,21 @@ import terrain.model.*;
 import domino.model.animation.*;
 import domino.network.*;
 
+// This struct is here to serve as a reminder to remove the unit from anything
+// it has invariants with, any caches, presenter, etc.
+#!DeriveStructDrop
+struct UnitMembership {
+  unit Unit;
+}
+
+#!DeriveStructDrop
 struct EditorServer {
   resourcesPath str;
   instance! Opt<EditorInstance>;
 }
 impl IRequestHandler for EditorServer;
 
+#!DeriveStructDrop
 struct EditorInstance {
   rand XS32Rand;
   domino GameToDominoConnection;
@@ -27,7 +36,7 @@ struct EditorInstance {
   lookatOffsetToCamera Vec3i;
   terrainController TerrainController;
   // turn this into a HashSet based on Unit, perhaps casting pointer to integer
-  units HashMap<int, Unit, IntHasher, IntEquator>;
+  units HashMap<int, UnitMembership, IntHasher, IntEquator>;
   unitPresenters HashMap<int, UnitPresenter, IntHasher, IntEquator>;
   locToUnit HashMap<Location, &!Unit, LocationHasher, LocationEquator>;
   unoccupiedWalkableLocs HashSet<Location, LocationHasher, LocationEquator>;
@@ -55,11 +64,11 @@ Result<JsonNode, str> {
 
     maybe_instance = HandleStartRequest(server.resourcesPath, &request);
     if maybe_instance.is_err() {
-      ret Err<JsonNode, str>(maybe_instance.expect_err());
+      ret Err<JsonNode, str>((maybe_instance).expect_err());
     }
     instance = (maybe_instance).expect();
     
-    set server.instance = Some(instance);
+    ((set server.instance = Some(instance)).as<None<EditorInstance>>()).expect();
   } else if event_type_str == "SetHoveredLocation" {
     maybe_request = ParseSetHoveredLocationRequest(&node);
     if maybe_request.is_err() {
@@ -129,7 +138,7 @@ Result<JsonNode, str> {
   ret Ok<JsonNode, str>(response_obj);
 }
 
-func handle(self &!EditorServer impl IRequestHandler, request_path str, request_json str) str {
+func handle(self &!EditorServer, request_path str, request_json str) str {
   maybe_request_root_node = jsonToNode(request_json.slice());
   if maybe_request_root_node.is_err() {
     ret "Couldn't parse request: " + maybe_request_root_node.expect_err();
@@ -196,5 +205,7 @@ exported func main() {
     panic("Usage: atharia vivimap.json");
   }
   resourcesPath = getMainArg(1);
-  runServer(&EditorServer(resourcesPath, None<EditorInstance>()));
+  server = EditorServer(resourcesPath, None<EditorInstance>());
+  runServer(&server);
+  panic("unreachable");
 }

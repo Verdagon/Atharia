@@ -41,6 +41,14 @@ func Attack(self &!Unit, server &!EditorInstance, enemy &!Unit) {
   if self.isPlayer {
     set server.gameTime = self.nextActionTime;
   }
+
+  if enemy.hp <= 0 {
+    // Exhibit 1
+    // server.units!.remove(enemy.id);
+    DestroyUnit(server, unlet enemy);
+  } else {
+    unlet enemy;
+  }
 }
 
 func Act(self &!Unit, server &!EditorInstance) {

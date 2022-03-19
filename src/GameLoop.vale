@@ -1,9 +1,6 @@
 
-
 func GameLoop(server &!EditorInstance) {
   remainingIterations = server.unitPresenters.len() * 3 + 100;
-
-  dyingUnits = List<(Unit, UnitPresenter)>();
 
   while
       maybeNextActingUnit = FindNextActingUnit(server);
@@ -16,35 +13,36 @@ func GameLoop(server &!EditorInstance) {
 
     nextActingUnit = (maybeNextActingUnit).get();
     println("At {server.gameTime} found next acting unit: {nextActingUnit.id} at {nextActingUnit.nextActionTime}");
-    if nextActingUnit.hp <= 0 {
-      if nextActingUnit.id == server.player.get().id {
-        server.lookPanelView!.SetStuff(true, "You have died, game over!", "", List<(InitialSymbol, str)>());
-        break;
-      } else {
-        println("Unit dying: {nextActingUnit.id}");
-        dyingUnits!.add((
-            server.units!.remove(nextActingUnit.id),
-            server.unitPresenters!.remove(nextActingUnit.id)));
-      }
-    } else if nextActingUnit.id == server.player.get().id {
+    if nextActingUnit.id == server.player.get().id {
       // We will move the player either on their input or on the Timer request.
       break;
     } else {
-      nextActingUnit!.Act(server);
+      Act(unlet nextActingUnit, server);
     }
   }
-
-  drop_into((dyingUnits).toArray(), &!([unit, presenter]) => {
-    println("Killing unit: {unit.id}");
-    server.locToUnit!.remove(unit.location);
-    server.unoccupiedWalkableLocs!.add(unit.location);
-    OnUnitDeath(presenter, server);
-    unit;
-  });
 
   if server.units.len() == 1 {
     server.lookPanelView!.SetStuff(true, "You have killed all the goblins, victory!", "", List<(InitialSymbol, str)>());
   }
+}
+
+func DestroyUnit(server &!EditorInstance, borrow_unit &!Unit) {
+  println("Destroying unit: {borrow_unit.id}");
+
+  unitMembership = server.units!.remove((unlet borrow_unit).id);
+
+  [unit] = unitMembership;
+
+  if unit.id == server.player.get().id {
+    server.lookPanelView!.SetStuff(true, "You have died, game over!", "", List<(InitialSymbol, str)>());
+  }
+
+  presenter = server.unitPresenters!.remove(unit.id);
+  OnUnitDeath(presenter, server);
+
+  server.locToUnit!.remove(unit.location);
+  server.unoccupiedWalkableLocs!.add(unit.location);
+  destruct unit;
 }
 
 func FindNextActingUnit(server &!EditorInstance) Opt<&!Unit> {
