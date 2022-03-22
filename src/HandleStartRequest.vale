@@ -2,7 +2,7 @@
 func HandleStartRequest(
   resourcesPath str,
   start_request &StartRequest)
-Result<EditorInstance, str> {
+Result<GameInstance, str> {
 
   domino = GameToDominoConnection();
 
@@ -12,15 +12,15 @@ Result<EditorInstance, str> {
 
   terrain = PatternMap<TerrainTile>(make_pentagon_9_pattern());
   unoccupiedWalkableLocs = HashSet<Location>(LocationHasher(), LocationEquator());
-  bool_map = MakeMap(&!rand);
+  bool_map = MakeMap(&rand);
   foreach [loc, walkable] in bool_map.tiles {
     if walkable {
-      terrain.tiles!.add(
+      terrain.tiles.add(
           loc,
           TerrainTile(loc, 1, walkable, List([#][DecorationComponent("grass")])));
-      unoccupiedWalkableLocs!.add(loc);
+      unoccupiedWalkableLocs.add(loc);
     } else {
-      terrain.tiles!.add(
+      terrain.tiles.add(
           loc,
           TerrainTile(loc, 1, walkable, List([#][DecorationComponent("rocks")])));
     }
@@ -28,14 +28,14 @@ Result<EditorInstance, str> {
 
   playerLoc =
       unoccupiedWalkableLocs
-      .GetRandomElement(TruncateI64ToI32(rand!.Next()))
+      .GetRandomElement(TruncateI64ToI32(rand.Next()))
       .get("No eligible player loc?");
 
   cameraLookAtPosition =
       pattern.GetTileCenter(playerLoc).Vec3i(0); //terrain.GetTileCenter(startLocation);
   lookatOffsetToCamera = Vec3i(0, 5000, -10000);
 
-  domino!.SetupGame(
+  domino.SetupGame(
       cameraLookAtPosition,
       lookatOffsetToCamera,
       200,
@@ -43,15 +43,15 @@ Result<EditorInstance, str> {
 
   vivimap = MemberToViewMapperLoadMap(resourcesPath, "vivimap.json");
 
-  membersView = ListView(&!domino, 0, 6, 40, 16);
-  lookPanelView = LookPanelView(&!domino, start_request.screen_gw, -1, 2);
+  membersView = ListView(&domino, 0, 6, 40, 16);
+  lookPanelView = LookPanelView(&domino, start_request.screen_gw, -1, 2);
 
-  terrain_controller = TerrainController(&!domino, &vivimap, terrain, 200);
+  terrain_controller = TerrainController(&domino, &vivimap, terrain, 200);
 
-  borrow_domino = &!domino;
-  borrow_rand = &!rand;
+  borrow_domino = &domino;
+  borrow_rand = &rand;
   instance =
-      EditorInstance(
+      GameInstance(
           rand,
           domino,
           vivimap,
@@ -61,32 +61,32 @@ Result<EditorInstance, str> {
           lookatOffsetToCamera,
           terrain_controller,
           HashMap<int, UnitMembership, IntHasher, IntEquator>(IntHasher(), IntEquator()),
-          HashMap<int, UnitPresenter, IntHasher, IntEquator>(IntHasher(), IntEquator()),
-          HashMap<Location, &!Unit, LocationHasher, LocationEquator>(LocationHasher(), LocationEquator()),
+          HashMap<int, UnitController, IntHasher, IntEquator>(IntHasher(), IntEquator()),
+          TokenedHashMap<Location, &Unit, LocationHasher, LocationEquator>(LocationHasher(), LocationEquator()),
           unoccupiedWalkableLocs,
-          None<&!Unit>(),
+          None<&Unit>(),
           0i64,
           0);
 
   playerElevation = instance.terrainController.terrain.tiles.get(playerLoc).get().elevation;
-  player = instance!.addUnit(Unit(100, playerLoc, playerElevation, true, None<Location>(), 0i64, 30, 30));
+  player = instance.addUnit(Unit(100, playerLoc, playerElevation, true, None<Location>(), 0i64, 30, 30));
   set instance.player = Some(player);
 
   foreach i in range(0, 10) {
-    enemyLoc = instance.unoccupiedWalkableLocs.GetRandomElement(TruncateI64ToI32(borrow_rand!.Next())).get("No eligible enemy loc?");
+    enemyLoc = instance.unoccupiedWalkableLocs.GetRandomElement(TruncateI64ToI32(borrow_rand.Next())).get("No eligible enemy loc?");
     enemyElevation = instance.terrainController.terrain.tiles.get(enemyLoc).get().elevation;
-    instance!.addUnit(Unit(101 + i, enemyLoc, 2, false, None<Location>(), 1i64, 5, 5));
+    instance.addUnit(Unit(101 + i, enemyLoc, 2, false, None<Location>(), 1i64, 5, 5));
   }
 
-  ret Ok<EditorInstance, str>(instance);
+  ret Ok<GameInstance, str>(instance);
 }
 
-func addUnit(instance &!EditorInstance, unit Unit) &!Unit {
+func addUnit(instance &GameInstance, unit Unit) &Unit {
   vassert(not instance.locToUnit.ContainsKey(unit.location), "addUnit: Already unit there?");
-  instance.locToUnit!.add(unit.location, &!unit);
-  instance.unoccupiedWalkableLocs!.remove(unit.location);
-  borrow_unit = &!unit;
-  instance.units!.add(unit.id, UnitMembership(unit));
-  instance.unitPresenters!.add(borrow_unit.id, UnitPresenter(instance.domino, &!borrow_unit));
+  borrow_unit = &unit;
+  instance.units.add(unit.id, UnitMembership(unit));
+  instance.UnitControllers.add(
+      borrow_unit.id,
+      UnitController(instance, borrow_unit));
   ret borrow_unit;
 }

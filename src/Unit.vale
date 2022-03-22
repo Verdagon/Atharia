@@ -13,30 +13,31 @@ struct Unit {
   maxHp int;
 }
 
-func SetDestination(self &!Unit, destination Location) {
+func SetDestination(self &Unit, destination Location) {
   set self.maybeDestination = Some(destination);
 }
 
-func HopTo(self &!Unit, server &!EditorInstance, newLoc Location, newElevation int) {
-  server.locToUnit!.remove(self.location);
-  server.unoccupiedWalkableLocs!.add(self.location);
+func HopTo(self &Unit, server &GameInstance, newLoc Location, newElevation int) {
+  token = server.locToUnit.add(self.location, self);
+  server.locToUnit.remove(self.location, token);
+  server.unoccupiedWalkableLocs.add(self.location);
   set self.location = newLoc;
   set self.elevation = newElevation;
   set self.nextActionTime = self.nextActionTime + 600i64;
-  (&!server.unitPresenters!.get(self.id)!.get()).OnHop(server, newLoc, newElevation);
-  server.unoccupiedWalkableLocs!.remove(self.location);
-  server.locToUnit!.add(self.location, self);
+  server.UnitControllers.get(self.id).get()&.OnHop(server, newLoc, newElevation);
+  server.unoccupiedWalkableLocs.remove(self.location);
+  
 
   if self.isPlayer {
     set server.gameTime = self.nextActionTime;
   }
 }
 
-func Attack(self &!Unit, server &!EditorInstance, enemy &!Unit) {
+func Attack(self &Unit, server &GameInstance, enemy &Unit) {
   set enemy.hp = enemy.hp - 10;
   set self.nextActionTime = self.nextActionTime + 600i64;
-  (&!server.unitPresenters!.get(self.id)!.get()).OnAttack(server, &enemy);
-  (&!server.unitPresenters!.get(enemy.id)!.get()).OnHpChanged(server);
+  server.UnitControllers.get(self.id).get().OnAttack(server, &enemy);
+  server.UnitControllers.get(enemy.id).get().OnHpChanged(server);
 
   if self.isPlayer {
     set server.gameTime = self.nextActionTime;
@@ -44,21 +45,21 @@ func Attack(self &!Unit, server &!EditorInstance, enemy &!Unit) {
 
   if enemy.hp <= 0 {
     // Exhibit 1
-    // server.units!.remove(enemy.id);
+    // server.units.remove(enemy.id);
     DestroyUnit(server, unlet enemy);
   } else {
     unlet enemy;
   }
 }
 
-func Act(self &!Unit, server &!EditorInstance) {
+func Act(self &Unit, server &GameInstance) {
   println("unit {self.id} acting!");
 
   if server.terrainController.terrain.pattern.IsAdjacent(
       self.location,
       server.player.get().location,
       false) {
-    self!.Attack(server, &!server.player!.get());
+    self.Attack(server, &server.player.get());
     ret void();
   }
 
@@ -94,7 +95,7 @@ func Act(self &!Unit, server &!EditorInstance) {
       possibleWanderLocs = List<Location>();
       foreach adjacent in adjacents {
         if server.unoccupiedWalkableLocs.contains(adjacent) {
-          possibleWanderLocs!.add(adjacent);
+          possibleWanderLocs.add(adjacent);
         }
       }
       if possibleWanderLocs.len() == 0 {
@@ -102,7 +103,7 @@ func Act(self &!Unit, server &!EditorInstance) {
         x Opt<Location> = None<Location>();
         x
       } else {
-        index = abs(TruncateI64ToI32(server.rand!.Next())) mod possibleWanderLocs.len();
+        index = abs(TruncateI64ToI32(server.rand.Next())) mod possibleWanderLocs.len();
         wanderLoc = possibleWanderLocs.get(index);
         x Opt<Location> = Some(wanderLoc);
         x
@@ -115,7 +116,7 @@ func Act(self &!Unit, server &!EditorInstance) {
     nextStepElevation =
         server.terrainController.terrain.tiles.get(nextStepLoc).get().elevation;
 
-    self!.HopTo(server, nextStepLoc, nextStepElevation);
+    self.HopTo(server, nextStepLoc, nextStepElevation);
   } else {
     set self.nextActionTime = self.nextActionTime + 600i64;
   }

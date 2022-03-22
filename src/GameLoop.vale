@@ -1,6 +1,6 @@
 
-func GameLoop(server &!EditorInstance) {
-  remainingIterations = server.unitPresenters.len() * 3 + 100;
+func GameLoop(server &GameInstance) {
+  remainingIterations = server.UnitControllers.len() * 3 + 100;
 
   while
       maybeNextActingUnit = FindNextActingUnit(server);
@@ -22,37 +22,35 @@ func GameLoop(server &!EditorInstance) {
   }
 
   if server.units.len() == 1 {
-    server.lookPanelView!.SetStuff(true, "You have killed all the goblins, victory!", "", List<(InitialSymbol, str)>());
+    server.lookPanelView.SetStuff(true, "You have killed all the goblins, victory!", "", List<(InitialSymbol, str)>());
   }
 }
 
-func DestroyUnit(server &!EditorInstance, borrow_unit &!Unit) {
+func DestroyUnit(server &GameInstance, borrow_unit &Unit) {
   println("Destroying unit: {borrow_unit.id}");
 
-  unitMembership = server.units!.remove((unlet borrow_unit).id);
+  unitMembership = server.units.remove((unlet borrow_unit).id);
 
   [unit] = unitMembership;
 
   if unit.id == server.player.get().id {
-    server.lookPanelView!.SetStuff(true, "You have died, game over!", "", List<(InitialSymbol, str)>());
+    server.lookPanelView.SetStuff(true, "You have died, game over!", "", List<(InitialSymbol, str)>());
   }
 
-  presenter = server.unitPresenters!.remove(unit.id);
-  OnUnitDeath(presenter, server);
+  presenter = server.UnitControllers.remove(unit.id);
+  Destroy(presenter, server);
 
-  server.locToUnit!.remove(unit.location);
-  server.unoccupiedWalkableLocs!.add(unit.location);
-  destruct unit;
+  unit;
 }
 
-func FindNextActingUnit(server &!EditorInstance) Opt<&!Unit> {
-  maybeNextActingUnit Opt<&!Unit> = None<&!Unit>();
+func FindNextActingUnit(server &GameInstance) Opt<&Unit> {
+  maybeNextActingUnit Opt<&Unit> = None<&Unit>();
 
-  foreach [id, unitPresenter] in &!server.unitPresenters {
-    if unitPresenter.unit.nextActionTime <= server.gameTime {
+  foreach [id, UnitController] in &server.UnitControllers {
+    if UnitController.unit.nextActionTime <= server.gameTime {
       if maybeNextActingUnit.isEmpty() or
-          unitPresenter.unit.nextActionTime < maybeNextActingUnit!.get().nextActionTime {
-        set maybeNextActingUnit = Some(unitPresenter.unit);
+          UnitController.unit.nextActionTime < maybeNextActingUnit.get().nextActionTime {
+        set maybeNextActingUnit = Some(UnitController.unit);
       }
     }
   }
@@ -60,8 +58,8 @@ func FindNextActingUnit(server &!EditorInstance) Opt<&!Unit> {
   ret maybeNextActingUnit;
 }
 
-func ProceedPlayer(server &!EditorInstance) {
-  player = &!server.player!.get();
+func ProceedPlayer(server &GameInstance) {
+  player = &server.player.get();
   println("Proceeding player! game time {server.gameTime} player enxt action time {player.nextActionTime}");
 
   destination = player.maybeDestination.get("Can't proceed, no destination!");
@@ -81,13 +79,13 @@ func ProceedPlayer(server &!EditorInstance) {
     println("There is indeed a path to {destination}, length {path.len()} next step {nextStepLoc}");
     nextStepElevation =
         server.terrainController.terrain.tiles.get(nextStepLoc).get().elevation;
-    player!.HopTo(server, nextStepLoc, nextStepElevation);
+    player.HopTo(server, nextStepLoc, nextStepElevation);
     println("Setting game time from {server.gameTime} to {player.nextActionTime}");
 
     [x, y] = server.terrainController.terrain.pattern.GetTileCenter(nextStepLoc);
     z = nextStepElevation * server.terrainController.elevationStepHeight;
     pos = Vec3i(x, y, z);
-    server.domino!.MoveCamera(pos, server.lookatOffsetToCamera, 1000);
+    server.domino.MoveCamera(pos, server.lookatOffsetToCamera, 1000);
 
     if nextStepLoc == destination {
       println("Player reached destination, stopping!");

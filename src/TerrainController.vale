@@ -4,7 +4,7 @@ import stdlib.collections.list.*;
 import stdlib.optutils.*;
 
 struct TerrainController {
-  domino &!GameToDominoConnection;
+  domino &GameToDominoConnection;
   vivimap &MemberToViewMapper;
   terrain PatternMap<TerrainTile>;
   elevationStepHeight int;
@@ -16,7 +16,7 @@ struct TerrainController {
 
 
 func TerrainController(
-    domino &!GameToDominoConnection,
+    domino &GameToDominoConnection,
     vivimap &MemberToViewMapper,
     terrain PatternMap<TerrainTile>,
     elevationStepHeight int)
@@ -34,8 +34,8 @@ TerrainController {
         LocationHasher(), LocationEquator()),
       None<Location>());
 
-  foreach [location Location, tile &!TerrainTile] in &!self.terrain.tiles {
-    self!.AddTerrainTile(location, &!tile);
+  foreach [location Location, tile &TerrainTile] in &self.terrain.tiles {
+    self.AddTerrainTile(location, &tile);
   }
 
   ret self;
@@ -51,36 +51,36 @@ func GetMaybeMouseHighlightLocation(self &TerrainController) Opt<Location> {
 //     }
 //   }
 // 
-func UpdateLocationHighlighted(self &!TerrainController, location Location) {
+func UpdateLocationHighlighted(self &TerrainController, location Location) {
   highlighted = &Some(location) == &self.maybeMouseHighlightedLocation;
-  maybeNewMousedTerrainTilePresenter = self.tilePresenters!.get(location);
+  maybeNewMousedTerrainTilePresenter = self.tilePresenters.get(location);
   if not maybeNewMousedTerrainTilePresenter.isEmpty() {
-    newMousedTerrainTilePresenter = &!maybeNewMousedTerrainTilePresenter!.get();
-    newMousedTerrainTilePresenter!.SetHighlighted(highlighted);
+    newMousedTerrainTilePresenter = &maybeNewMousedTerrainTilePresenter.get();
+    newMousedTerrainTilePresenter.SetHighlighted(highlighted);
   }
 }
 
-func AddTerrainTile(self &!TerrainController, location Location, tile &!TerrainTile) {
+func AddTerrainTile(self &TerrainController, location Location, tile &TerrainTile) {
   presenter =
     TerrainTilePresenter(
-      &!self.domino,
+      &self.domino,
       self.vivimap,
-      &!self.terrain,
+      &self.terrain,
       tile,
       location);
-  self.tilePresenters!.add(location, presenter);
+  self.tilePresenters.add(location, presenter);
 }
 
 
-func SetHoveredLocation(self &!TerrainController, newMaybeMouseHighlightedLocation &Opt<Location>) {
+func SetHoveredLocation(self &TerrainController, newMaybeMouseHighlightedLocation &Opt<Location>) {
   if newMaybeMouseHighlightedLocation != &self.maybeMouseHighlightedLocation {
     oldMaybeMouseHighlightedLocation =
       set self.maybeMouseHighlightedLocation = newMaybeMouseHighlightedLocation.clone();
     if oldMaybeMouseHighlightedLocation.nonEmpty() {
-      self!.UpdateLocationHighlighted(oldMaybeMouseHighlightedLocation.get());
+      self.UpdateLocationHighlighted(oldMaybeMouseHighlightedLocation.get());
     }
     if newMaybeMouseHighlightedLocation.nonEmpty() {
-      self!.UpdateLocationHighlighted(newMaybeMouseHighlightedLocation.get());
+      self.UpdateLocationHighlighted(newMaybeMouseHighlightedLocation.get());
     }
   }
 }

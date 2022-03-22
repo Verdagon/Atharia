@@ -1,8 +1,8 @@
 
 
 struct TerrainTilePresenter {
-  domino &!GameToDominoConnection;
-  terrainTile &!TerrainTile;
+  domino &GameToDominoConnection;
+  terrainTile &TerrainTile;
   location Location;
 
   tileViewId i64;
@@ -10,7 +10,7 @@ struct TerrainTilePresenter {
   highlighted! bool;
 }
 
-func ComposeComponent(initialTile &!InitialTile, self &DecorationComponent) {
+func ComposeComponent(initialTile &InitialTile, self &DecorationComponent) {
   if self.name == "rocks" {
     set initialTile.topColor = ConstantVec4iAnimation(Vec4i(30, 30, 30, 255));
     set initialTile.sideColor = ConstantVec4iAnimation(Vec4i(20, 20, 20, 255));
@@ -36,10 +36,10 @@ func ComposeComponent(initialTile &!InitialTile, self &DecorationComponent) {
 }
 
 func TerrainTilePresenter(
-  domino &!GameToDominoConnection,
+  domino &GameToDominoConnection,
   vivimap &MemberToViewMapper,
-  terrain &!PatternMap<TerrainTile>,
-  terrainTile &!TerrainTile,
+  terrain &PatternMap<TerrainTile>,
+  terrainTile &TerrainTile,
   location Location)
 TerrainTilePresenter {
 
@@ -47,7 +47,7 @@ TerrainTilePresenter {
 
   description = MakeTileDescription(location, &terrainTile, highlighted);
 
-  tileViewId = domino!.CreateTile(description);
+  tileViewId = domino.CreateTile(description);
 
   self =
       TerrainTilePresenter(
@@ -66,48 +66,48 @@ TerrainTilePresenter {
 //       ret positionVec3;
 //     }
 // 
-func SetHighlighted(self &!TerrainTilePresenter, highlighted bool) {
+func SetHighlighted(self &TerrainTilePresenter, highlighted bool) {
   println("Setting location {self.location} to highlighted={highlighted})");
   set self.highlighted = highlighted;
-  self!.RefreshSurfaceColor();
+  self.RefreshSurfaceColor();
 }
 
-func RefreshSurfaceColor(self &!TerrainTilePresenter) {
-  self.domino!.SetSurfaceColor(
+func RefreshSurfaceColor(self &TerrainTilePresenter) {
+  self.domino.SetSurfaceColor(
       self.tileViewId,
       MakeTileDescription(self.location, &self.terrainTile, self.highlighted).topColor.clone());
 }
 
-func RefreshSideColor(self &!TerrainTilePresenter) {
+func RefreshSideColor(self &TerrainTilePresenter) {
   vassert(self.membersSideColors.len() > 0, "No side color!");
-  self.domino!.SetCliffColor(self.tileViewId, GrassSideColor());
+  self.domino.SetCliffColor(self.tileViewId, GrassSideColor());
 }
 
-func RefreshFeature(self &!TerrainTilePresenter) {
-  //self.domino!.SetFeature(
+func RefreshFeature(self &TerrainTilePresenter) {
+  //self.domino.SetFeature(
   //    self.tileViewId,
   //    if self.membersFeatures.len() == 0 { None<InitialSymbol>() }
   //    else { Some<InitialSymbol>(self.membersFeatures.get(self.membersFeatures.len() - 1).1.clone()) });
 }
 
 
-func RefreshOverlay(self &!TerrainTilePresenter) {
+func RefreshOverlay(self &TerrainTilePresenter) {
   //println("RefreshOverlay len " + self.membersOverlays.len());
-  //self.domino!.SetOverlay(
+  //self.domino.SetOverlay(
   //  self.tileViewId,
   //  CalculateMaybeOverlay(&self.membersOverlays));
 }
 
-func RefreshItems(self &!TerrainTilePresenter) {
-  self.domino!.ClearItems(self.tileViewId);
+func RefreshItems(self &TerrainTilePresenter) {
+  self.domino.ClearItems(self.tileViewId);
   foreach [id, item] in self.membersItems {
-    self.domino!.AddItem(self.tileViewId, id, item.clone());
+    self.domino.AddItem(self.tileViewId, id, item.clone());
   }
 }
 
-func SetElevation(self &!TerrainTilePresenter, elevation int) {
+func SetElevation(self &TerrainTilePresenter, elevation int) {
   set self.terrainTile.elevation = elevation;
-  self.domino!.SetElevation(self.tileViewId, elevation);
+  self.domino.SetElevation(self.tileViewId, elevation);
 }
 
 //func CalculateMaybeOverlay(membersOverlays &List<(i64, InitialSymbol)>) Opt<InitialSymbol> {
@@ -136,7 +136,7 @@ func MakeTileDescription(loc Location, terrainTile &TerrainTile, highlighted boo
           None<InitialSymbol>(),
           List<(i64, InitialSymbol)>());
   foreach component in terrainTile.components {
-    ComposeComponent(&!description, component);
+    ComposeComponent(&description, component);
   }
   set description.topColor =
       MaybeTintTopColor(description.topColor.clone(), highlighted);

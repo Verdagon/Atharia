@@ -1,0 +1,44 @@
+
+#!DeriveStructDrop
+struct HashMapToken<K Ref, V Ref> where K Ref, V Ref { }
+
+#!DeriveStructDrop
+struct TokenedHashMap<K, V, H, E> {
+  _inner HashMap<K, V, H, E>;
+}
+
+func TokenedHashMap<K, V, H, E>(hasher H, equator E) TokenedHashMap<K, V, H, E> {
+  TokenedHashMap<K, V, H, E>(
+      HashMap<K, V, H, E>(hasher, equator))
+}
+
+func drop<K, V, H, E>(self TokenedHashMap<K, V, H, E>) void
+where Prot["drop", Refs(V), void]
+{
+  [_inner] = self;
+  drop(_inner);
+}
+
+func len<K, V, H, E>(self &TokenedHashMap<K, V, H, E>) int { self._inner.len() }
+
+func add<K, V, H, E>(self &TokenedHashMap<K, V, H, E>, key K, value V) HashMapToken<K, V> {
+  self._inner.add(key, value);
+  ret HashMapToken<K, V>();
+}
+
+func ContainsKey<K, V, H, E>(self &TokenedHashMap<K, V, H, E>, key K) bool {
+  self._inner.ContainsKey(key)
+}
+
+func remove<K, V, H, E>(
+  self &TokenedHashMap<K, V, H, E>,
+  key K,
+  token HashMapToken<K, V>)
+V {
+  destruct token;
+  ret self._inner.remove(key);
+}
+
+func get<K, V, H, E>(self &TokenedHashMap<K, V, H, E>, key K) Opt<&V> {
+  self._inner.get(key)
+}

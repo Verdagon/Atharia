@@ -1,17 +1,18 @@
 
-struct UnitPresenter {
-  domino &!GameToDominoConnection;
-  unit &!Unit;
-
-  unitViewId! i64;
+#!DeriveStructDrop
+struct UnitController {
+  unit &Unit;
+  locToUnitToken HashMapToken<Location, &Unit>;
+  view UnitView;
 }
 
-func UnitPresenter(
-  domino &!GameToDominoConnection,
-  unit &!Unit)
-UnitPresenter {
-  unitViewId =
-      domino!.CreateUnit(
+func UnitController(
+  server &GameInstance,
+  unit &Unit)
+UnitController {
+  view =
+      UnitView(
+          server.domino,
           if unit.isPlayer {
             InitialUnit(
               unit.location,
@@ -67,30 +68,36 @@ UnitPresenter {
               unit.maxHp)
           });
 
-  self = UnitPresenter(domino, unit, unitViewId);
+
+  locToUnitToken = server.locToUnit.add(unit.location, &unit);
+  server.unoccupiedWalkableLocs.remove(unit.location);
+
+  self = UnitController(unit, locToUnitToken, view);
 
   ret self;
 }
 
-func OnHop(self &!UnitPresenter, server &!EditorInstance, newLoc Location, newElevation int) {
-  self.domino!.UnitHopTo(self.unitViewId, newLoc, newElevation, 300);
+func OnHop(self &UnitController, server &GameInstance, newLoc Location, newElevation int) {
+  self.view.HopTo(server.domino, newLoc, newElevation, 300);
   set server.animationsEndTimeFromNow =
       max(server.animationsEndTimeFromNow, 300);
 }
 
-func OnUnitDeath(self UnitPresenter, server &!EditorInstance) {
-  self.domino!.DestroyUnit(self.unitViewId);
+func Destroy(self UnitController, server &GameInstance) {
+  [unit, locToUnitToken, view] = self;
+  server.locToUnit.remove(unit.location, locToUnitToken);
+  (view).Destroy(server.domino);
   set server.animationsEndTimeFromNow =
       max(server.animationsEndTimeFromNow, 500);
-  destruct self;
+  unit;
 }
 
-func OnAttack(self &!UnitPresenter, server &!EditorInstance, enemy &Unit) {
-  self.domino!.UnitLunge(self.unitViewId, enemy.location, 150);
+func OnAttack(self &UnitController, server &GameInstance, enemy &Unit) {
+  self.view.Lunge(server.domino, enemy.location, 150);
   set server.animationsEndTimeFromNow =
       max(server.animationsEndTimeFromNow, 150);
 }
 
-func OnHpChanged(self &!UnitPresenter, server &!EditorInstance) {
-  self.domino!.UnitHpChanged(self.unitViewId, self.unit.hp);
+func OnHpChanged(self &UnitController, server &GameInstance) {
+  self.view.ChangeHp(server.domino, self.unit.hp);
 }

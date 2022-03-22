@@ -19,14 +19,14 @@ struct UnitMembership {
 }
 
 #!DeriveStructDrop
-struct EditorServer {
+struct GameServer {
   resourcesPath str;
-  instance! Opt<EditorInstance>;
+  instance! Opt<GameInstance>;
 }
-impl IRequestHandler for EditorServer;
+impl IRequestHandler for GameServer;
 
 #!DeriveStructDrop
-struct EditorInstance {
+struct GameInstance {
   rand XS32Rand;
   domino GameToDominoConnection;
   vivimap MemberToViewMapper;
@@ -37,16 +37,16 @@ struct EditorInstance {
   terrainController TerrainController;
   // turn this into a HashSet based on Unit, perhaps casting pointer to integer
   units HashMap<int, UnitMembership, IntHasher, IntEquator>;
-  unitPresenters HashMap<int, UnitPresenter, IntHasher, IntEquator>;
-  locToUnit HashMap<Location, &!Unit, LocationHasher, LocationEquator>;
+  UnitControllers HashMap<int, UnitController, IntHasher, IntEquator>;
+  locToUnit TokenedHashMap<Location, &Unit, LocationHasher, LocationEquator>;
   unoccupiedWalkableLocs HashSet<Location, LocationHasher, LocationEquator>;
-  player! Opt<&!Unit>;
+  player! Opt<&Unit>;
   gameTime! i64;
   animationsEndTimeFromNow! int;
 }
 
 func HandleEvent(
-  server &!EditorServer,
+  server &GameServer,
   node &JsonObject)
 Result<JsonNode, str> {
   maybe_event_type_str = expect_obj_member_str(node, "event_type");
@@ -68,7 +68,7 @@ Result<JsonNode, str> {
     }
     instance = (maybe_instance).expect();
     
-    ((set server.instance = Some(instance)).as<None<EditorInstance>>()).expect();
+    ((set server.instance = Some(instance)).as<None<GameInstance>>()).expect();
   } else if event_type_str == "SetHoveredLocation" {
     maybe_request = ParseSetHoveredLocationRequest(&node);
     if maybe_request.is_err() {
@@ -76,7 +76,7 @@ Result<JsonNode, str> {
     }
     request = (maybe_request).expect();
 
-    maybe_result = HandleSetHoveredLocationRequest(&!server.instance!.get(), &request);
+    maybe_result = HandleSetHoveredLocationRequest(&server.instance.get(), &request);
     if maybe_result.is_err() {
       ret Err<JsonNode, str>((maybe_result).expect_err());
     }
@@ -87,7 +87,7 @@ Result<JsonNode, str> {
     }
     request = (maybe_request).expect();
 
-    maybe_result = HandleLocationMouseDownRequest(&!server.instance!.get(), &request);
+    maybe_result = HandleLocationMouseDownRequest(&server.instance.get(), &request);
     if maybe_result.is_err() {
       ret Err<JsonNode, str>((maybe_result).expect_err());
     }
@@ -98,7 +98,7 @@ Result<JsonNode, str> {
     }
     request = (maybe_request).expect();
 
-    maybe_result = HandleTimerElapsedRequest(&!server.instance!.get(), &request);
+    maybe_result = HandleTimerElapsedRequest(&server.instance.get(), &request);
     if maybe_result.is_err() {
       ret Err<JsonNode, str>((maybe_result).expect_err());
     }
@@ -109,7 +109,7 @@ Result<JsonNode, str> {
     }
     request = (maybe_request).expect();
 
-    maybe_result = HandleKeyDownRequest(&!server.instance!.get(), &request);
+    maybe_result = HandleKeyDownRequest(&server.instance.get(), &request);
     if maybe_result.is_err() {
       ret Err<JsonNode, str>((maybe_result).expect_err());
     }
@@ -118,9 +118,9 @@ Result<JsonNode, str> {
   }
 
   if not server.instance.isEmpty() {
-    instance = server.instance!.get();
+    instance = server.instance.get();
     if instance.animationsEndTimeFromNow > 0 {
-      instance.domino!.Timer(instance.animationsEndTimeFromNow, 0i64);
+      instance.domino.Timer(instance.animationsEndTimeFromNow, 0i64);
     }
     set instance.animationsEndTimeFromNow = 0;
   }
@@ -128,17 +128,17 @@ Result<JsonNode, str> {
   commands_json_arr =
     JsonArray(
       if not server.instance.isEmpty() {
-        server.instance!.get().domino!.TakeCommands()
+        server.instance.get().domino.TakeCommands()
       } else {
         Array<mut, JsonNode>(0)
       });
   response_obj = JsonObject();
-  response_obj.fields!.add("commands", commands_json_arr);
+  response_obj.fields.add("commands", commands_json_arr);
 
   ret Ok<JsonNode, str>(response_obj);
 }
 
-func handle(self &!EditorServer, request_path str, request_json str) str {
+func handle(self &GameServer, request_path str, request_json str) str {
   maybe_request_root_node = jsonToNode(request_json.slice());
   if maybe_request_root_node.is_err() {
     ret "Couldn't parse request: " + maybe_request_root_node.expect_err();
@@ -160,12 +160,12 @@ func handle(self &!EditorServer, request_path str, request_json str) str {
   ret "Response: " + response_obj.str();
 }
 
-func UpdateLookPanelView(server &!EditorInstance) {
+func UpdateLookPanelView(server &GameInstance) {
   maybeLocation = server.terrainController.GetMaybeMouseHighlightLocation();
   if &maybeLocation != &server.maybeLookedLocation {
     set server.maybeLookedLocation = maybeLocation.clone();
     if maybeLocation.isEmpty() {
-      server.lookPanelView!.SetStuff(false, "", "", List<(InitialSymbol, str)>());
+      server.lookPanelView.SetStuff(false, "", "", List<(InitialSymbol, str)>());
     } else {
       location = maybeLocation.get();
       message = "(" + location.group_x + ", " + location.group_y + ", " + location.index_in_group + ")";
@@ -186,11 +186,11 @@ func UpdateLookPanelView(server &!EditorInstance) {
                   None<InitialSymbolSides>(),
                   180,
                   100);
-          symbolsAndDescriptions!.add((symbol, member));
+          symbolsAndDescriptions.add((symbol, member));
         }
       }
 
-      server.lookPanelView!.SetStuff(true, message, "", symbolsAndDescriptions);
+      server.lookPanelView.SetStuff(true, message, "", symbolsAndDescriptions);
     }
   }
 }
@@ -205,7 +205,7 @@ exported func main() {
     panic("Usage: atharia vivimap.json");
   }
   resourcesPath = getMainArg(1);
-  server = EditorServer(resourcesPath, None<EditorInstance>());
+  server = GameServer(resourcesPath, None<GameInstance>());
   runServer(&server);
   panic("unreachable");
 }

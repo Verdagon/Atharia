@@ -1,13 +1,13 @@
 
 func HandleSetHoveredLocationRequest(
-  server &!EditorInstance,
+  server &GameInstance,
   request &SetHoveredLocationRequest)
 Result<(), str> {
-  domino = &!server.domino;
+  domino = &server.domino;
 
   println("In HandleSetHoveredLocationRequest");
 
-  server.terrainController!.SetHoveredLocation(request.location);
+  server.terrainController.SetHoveredLocation(request.location);
 
   ret Ok<(), str>(());
 }

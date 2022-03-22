@@ -1,9 +1,9 @@
 
 func HandleTimerElapsedRequest(
-  server &!EditorInstance,
+  server &GameInstance,
   request &TimerElapsedRequest)
 Result<(), str> {
-  domino = &!server.domino;
+  domino = &server.domino;
 
   println("In HandleTimerElapsedRequest");
   tag = request.tag;
@@ -19,7 +19,7 @@ Result<(), str> {
     println("Next acting unit isnt player!");
     ret Ok<(), str>(());
   }
-  player = &!server.player!.get();
+  player = &server.player.get();
 
   if player.maybeDestination.isEmpty() {
     // Do nothing, wait for input
@@ -27,7 +27,7 @@ Result<(), str> {
   }
 
   println("Timer elapsed, player dest is {player.maybeDestination.get()}, proceeding player!");
-  server!.ProceedPlayer();
+  server.ProceedPlayer();
 
   GameLoop(server);
 

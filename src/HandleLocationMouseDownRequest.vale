@@ -1,50 +1,50 @@
 
 func HandleLocationMouseDownRequest(
-  server &!EditorInstance,
+  server &GameInstance,
   request &LocationMouseDownRequest)
 Result<(), str> {
-  domino = &!server.domino;
+  domino = &server.domino;
 
   println("In HandleLocationMouseDownRequest");
   location = request.location;
 
   if server.units.len() == 1 {
-    server.lookPanelView!.SetStuff(true, "You have killed all the goblins, victory!", "", List<(InitialSymbol, str)>());
+    server.lookPanelView.SetStuff(true, "You have killed all the goblins, victory!", "", List<(InitialSymbol, str)>());
     ret Ok<(), str>(());
   }
 
   if not server.terrainController.tilePresenters.ContainsKey(location) {
-    server.lookPanelView!.SetStuff(true, "Invalid click location: {location}.", "", List<(InitialSymbol, str)>());
+    server.lookPanelView.SetStuff(true, "Invalid click location: {location}.", "", List<(InitialSymbol, str)>());
     ret Ok<(), str>(());
   }
 
-  player = &!server.player!.get();
+  player = &server.player.get();
 
   if player.hp < 0 {
     println("Already dead, game over!");
     ret Ok<(), str>(());
   }
 
-  server.lookPanelView!.SetStuff(false, "", "", List<(InitialSymbol, str)>());
+  server.lookPanelView.SetStuff(false, "", "", List<(InitialSymbol, str)>());
 
   if server.locToUnit.ContainsKey(location) {
-    otherUnit = &!server.locToUnit!.get(location)!.get();
+    otherUnit = &server.locToUnit.get(location).get();
     if player.id == otherUnit.id {
-      server.lookPanelView!.SetStuff(true, "Clicked on self, doing nothing.", "", List<(InitialSymbol, str)>());
+      server.lookPanelView.SetStuff(true, "Clicked on self, doing nothing.", "", List<(InitialSymbol, str)>());
       ret Ok<(), str>(());
     }
 
-    player!.Attack(server, otherUnit);
+    player.Attack(server, otherUnit);
   } else {
     if not server.unoccupiedWalkableLocs.contains(location) {
-      server.lookPanelView!.SetStuff(true, "Clicked on unwalkable tile, doing nothing.", "", List<(InitialSymbol, str)>());
+      server.lookPanelView.SetStuff(true, "Clicked on unwalkable tile, doing nothing.", "", List<(InitialSymbol, str)>());
       ret Ok<(), str>(());
     }
 
     tilePresenter = server.terrainController.tilePresenters.get(location).get();
-    player!.SetDestination(location);
+    player.SetDestination(location);
     println("Mouse down, set dest to {location}, proceeding player!");
-    server!.ProceedPlayer();
+    server.ProceedPlayer();
   }
 
   GameLoop(server);

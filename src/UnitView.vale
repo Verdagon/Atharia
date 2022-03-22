@@ -1,0 +1,20 @@
+#!DeriveStructDrop
+struct UnitView {
+  viewId i64;
+}
+func UnitView(domino &GameToDominoConnection, initialUnit InitialUnit) UnitView {
+  self.viewId = domino.CreateUnit(initialUnit);
+}
+func Destroy(self UnitView, domino &GameToDominoConnection) {
+  [viewId] = self;
+  domino.DestroyUnit(viewId);
+}
+func Lunge(self &UnitView, domino &GameToDominoConnection, loc Location, duration int) {
+  domino.UnitLunge(self.viewId, loc, duration);
+}
+func ChangeHp(self &UnitView, domino &GameToDominoConnection, newHp int) {
+  domino.UnitHpChanged(self.viewId, newHp);
+}
+func HopTo(self &UnitView, domino &GameToDominoConnection, newLoc Location, newElevation int, duration int) {
+  domino.UnitHopTo(self.viewId, newLoc, newElevation, duration);
+}
