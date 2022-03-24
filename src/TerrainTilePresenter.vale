@@ -10,7 +10,9 @@ struct TerrainTilePresenter {
   highlighted! bool;
 }
 
-func ComposeComponent(initialTile &InitialTile, self &DecorationComponent) {
+func ComposeComponent(loc Location, initialTile &InitialTile, self &DecorationComponent) {
+  rand = XS32Rand(i64(loc.group_x * 13 + loc.group_y * 17 + loc.index_in_group * 23));
+
   if self.name == "rocks" {
     set initialTile.topColor = ConstantVec4iAnimation(Vec4i(30, 30, 30, 255));
     set initialTile.sideColor = ConstantVec4iAnimation(Vec4i(20, 20, 20, 255));
@@ -28,8 +30,46 @@ func ComposeComponent(initialTile &InitialTile, self &DecorationComponent) {
                   0,
                   100));
   } else if self.name == "grass" {
-    set initialTile.topColor = ConstantVec4iAnimation(Vec4i(0, 75, 0, 255));
-    set initialTile.sideColor = ConstantVec4iAnimation(Vec4i(0, 50, 0, 255));
+    set initialTile.topColor = ConstantVec4iAnimation(Vec4i(0, 37, 0, 255));
+    set initialTile.sideColor = ConstantVec4iAnimation(Vec4i(0, 25, 0, 255));
+    r = rand.Next().TruncateI64ToI32().abs().mod(8);
+    set initialTile.maybeOverlaySymbol =
+        if r < 4 {
+          Some(
+                InitialSymbol(
+                    InitialSymbolGlyph(
+                        SymbolId(
+                            "AthSymbols",
+                            if r == 0 { 66 }
+                            else if r == 1 { 62 }
+                            else if r == 2 { 55 }
+                            else { 69 }),
+                        ConstantVec4iAnimation(Vec4i(0, 50, 0, 255))),
+                    None<InitialSymbolOutline>(),
+                    None<InitialSymbolSides>(),
+                    0,
+                    100))
+        } else {
+          None<InitialSymbol>()
+        };
+  } else if self.name == "water" {
+    set initialTile.topColor = ConstantVec4iAnimation(Vec4i(0, 20, 48, 255));
+    set initialTile.sideColor = ConstantVec4iAnimation(Vec4i(0, 15, 32, 255));
+    r = rand.Next().TruncateI64ToI32().abs().mod(2);
+    set initialTile.maybeOverlaySymbol =
+        if r == 0 {
+          Some(
+                InitialSymbol(
+                    InitialSymbolGlyph(
+                        SymbolId("AthSymbols", 111),
+                        ConstantVec4iAnimation(Vec4i(12, 35, 96, 50))),
+                    None<InitialSymbolOutline>(),
+                    None<InitialSymbolSides>(),
+                    0,
+                    100))
+        } else {
+          None<InitialSymbol>()
+        };
   } else {
     println("Unknown decoration component: {self.name}");
   }
@@ -136,7 +176,7 @@ func MakeTileDescription(loc Location, terrainTile &TerrainTile, highlighted boo
           None<InitialSymbol>(),
           List<(i64, InitialSymbol)>());
   foreach component in terrainTile.components {
-    ComposeComponent(&description, component);
+    ComposeComponent(loc, &description, component);
   }
   set description.topColor =
       MaybeTintTopColor(description.topColor.clone(), highlighted);

@@ -12,17 +12,17 @@ Result<GameInstance, str> {
 
   terrain = PatternMap<TerrainTile>(make_pentagon_9_pattern());
   unoccupiedWalkableLocs = HashSet<Location>(LocationHasher(), LocationEquator());
-  bool_map = MakeMap(&rand);
+  bool_map = MakeLakyForestMap(&rand);
   foreach [loc, walkable] in bool_map.tiles {
     if walkable {
       terrain.tiles.add(
           loc,
-          TerrainTile(loc, 1, walkable, List([#][DecorationComponent("grass")])));
+          TerrainTile(loc, 2, walkable, List([#][DecorationComponent("grass")])));
       unoccupiedWalkableLocs.add(loc);
     } else {
       terrain.tiles.add(
           loc,
-          TerrainTile(loc, 1, walkable, List([#][DecorationComponent("rocks")])));
+          TerrainTile(loc, 1, walkable, List([#][DecorationComponent("water")])));
     }
   }
 

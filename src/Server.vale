@@ -8,6 +8,8 @@ import stdlib.stringutils.*;
 import domino.model.*;
 import terrain.*;
 import terrain.model.*;
+import terrain.algorithms.*;
+import terrain.maps.*;
 import domino.model.animation.*;
 import domino.network.*;
 

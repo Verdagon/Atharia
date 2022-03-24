@@ -18,7 +18,7 @@ func SetDestination(self &Unit, destination Location) {
 }
 
 func HopTo(self &Unit, server &GameInstance, newLoc Location, newElevation int) {
-  token = server.locToUnit.add(self.location, self);
+  token = server.locToUnit.add(newLoc, self);
   server.locToUnit.remove(self.location, token);
   server.unoccupiedWalkableLocs.add(self.location);
   set self.location = newLoc;

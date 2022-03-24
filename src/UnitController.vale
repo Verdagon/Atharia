@@ -31,7 +31,10 @@ UnitController {
                   InitialSymbolGlyph(
                       SymbolId("AthSymbols", 57),
                       ConstantVec4iAnimation(Vec4i(255, 255, 255, 380))),
-                  None<InitialSymbolOutline>(),
+                  Some(
+                      InitialSymbolOutline(
+                          OuterOutline(),
+                          ConstantVec4iAnimation(Vec4i(0, 0, 0, 255)))),
                   None<InitialSymbolSides>(),
                   0,
                   100),
@@ -58,7 +61,7 @@ UnitController {
                       ConstantVec4iAnimation(Vec4i(255, 255, 255, 380))),
                   Some(
                       InitialSymbolOutline(
-                          CenteredOutline(),
+                          OuterOutline(),
                           ConstantVec4iAnimation(Vec4i(0, 0, 0, 255)))),
                   None<InitialSymbolSides>(),
                   0,
